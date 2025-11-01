@@ -158,14 +158,6 @@
                                 <input type="file" class="form-control" id="image" name="image" accept="image/*">
                                 <small class="text-muted">Format: JPG, PNG, max 2MB. Kosongkan jika tidak ingin mengubah gambar.</small>
                             </div>
-
-                            <div class="form-group mb-3">
-                                <label for="is_active">Status</label>
-                                <select class="form-select" id="is_active" name="is_active">
-                                    <option value="1" <?= old('is_active', $product['is_active']) == 1 ? 'selected' : '' ?>>Aktif</option>
-                                    <option value="0" <?= old('is_active', $product['is_active']) == 0 ? 'selected' : '' ?>>Nonaktif</option>
-                                </select>
-                            </div>
                         </div>
                     </div>
 

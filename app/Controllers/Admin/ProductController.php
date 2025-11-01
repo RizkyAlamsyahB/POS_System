@@ -45,7 +45,7 @@ class ProductController extends BaseController
         $data = [
             'title'      => 'Tambah Produk',
             'user'       => auth()->user(),
-            'categories' => $this->categoryModel->getActiveCategories(),
+            'categories' => $this->categoryModel->findAll(),
         ];
 
         return view('admin/products/create', $data);
@@ -83,7 +83,6 @@ class ProductController extends BaseController
             'tax_rate'     => $this->request->getPost('tax_rate') ?? 0,
             'tax_included' => $this->request->getPost('tax_included') ? 1 : 0,
             'image'        => $imagePath,
-            'is_active'    => $this->request->getPost('is_active') ? 1 : 0,
         ];
 
         if ($productId = $this->productModel->insert($data)) {
@@ -108,7 +107,7 @@ class ProductController extends BaseController
             'title'      => 'Edit Produk',
             'user'       => auth()->user(),
             'product'    => $product,
-            'categories' => $this->categoryModel->getActiveCategories(),
+            'categories' => $this->categoryModel->findAll(),
         ];
 
         return view('admin/products/edit', $data);
@@ -157,7 +156,6 @@ class ProductController extends BaseController
             'tax_rate'     => $this->request->getPost('tax_rate') ?? 0,
             'tax_included' => $this->request->getPost('tax_included') ? 1 : 0,
             'image'        => $imagePath,
-            'is_active'    => $this->request->getPost('is_active') ? 1 : 0,
         ];
 
         if ($this->productModel->update($id, $data)) {

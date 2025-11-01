@@ -79,11 +79,6 @@ class CreateProductsTable extends Migration
                 'null'       => true,
                 'comment'    => 'Path/URL gambar produk',
             ],
-            'is_active' => [
-                'type'       => 'TINYINT',
-                'constraint' => 1,
-                'default'    => 1,
-            ],
             'created_at' => [
                 'type' => 'DATETIME',
                 'null' => false,
@@ -99,7 +94,6 @@ class CreateProductsTable extends Migration
         $this->forge->addUniqueKey('sku');
         $this->forge->addUniqueKey('barcode');
         $this->forge->addKey('barcode_alt');
-        $this->forge->addKey('is_active');
         
         $this->forge->addForeignKey('category_id', 'categories', 'id', 'RESTRICT', 'CASCADE');
         
