@@ -41,14 +41,13 @@
                                 <th>Kategori</th>
                                 <th>Harga Jual</th>
                                 <th>HPP</th>
-                                <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($products)): ?>
                                 <tr>
-                                    <td colspan="9" class="text-center">Belum ada data produk</td>
+                                    <td colspan="8" class="text-center">Belum ada data produk</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($products as $index => $product): ?>
@@ -60,13 +59,6 @@
                                         <td><?= esc($product['category_name']) ?></td>
                                         <td>Rp <?= number_format($product['price'], 0, ',', '.') ?></td>
                                         <td>Rp <?= number_format($product['cost_price'], 0, ',', '.') ?></td>
-                                        <td>
-                                            <?php if ($product['is_active']): ?>
-                                                <span class="badge bg-success">Aktif</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-secondary">Nonaktif</span>
-                                            <?php endif; ?>
-                                        </td>
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <a href="/admin/products/stock/<?= $product['id'] ?>" class="btn btn-sm btn-info" title="Kelola Stok">

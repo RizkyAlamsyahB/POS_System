@@ -8,7 +8,7 @@ class CategoryModel extends Model
 {
     protected $table = 'categories';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['name', 'description', 'is_active'];
+    protected $allowedFields = ['name', 'description'];
     protected $useTimestamps = true;
     protected $createdField = 'created_at';
     protected $updatedField = 'updated_at';
@@ -24,14 +24,6 @@ class CategoryModel extends Model
             'is_unique'  => 'Nama kategori sudah digunakan',
         ],
     ];
-
-    /**
-     * Get all active categories
-     */
-    public function getActiveCategories()
-    {
-        return $this->where('is_active', 1)->findAll();
-    }
 
     /**
      * Get category with product count

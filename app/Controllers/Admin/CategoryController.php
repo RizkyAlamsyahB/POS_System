@@ -53,7 +53,6 @@ class CategoryController extends BaseController
         $data = [
             'name'        => $this->request->getPost('name'),
             'description' => $this->request->getPost('description'),
-            'is_active'   => $this->request->getPost('is_active') ? 1 : 0,
         ];
 
         if ($this->categoryModel->insert($data)) {
@@ -101,7 +100,6 @@ class CategoryController extends BaseController
         $data = [
             'name'        => $this->request->getPost('name'),
             'description' => $this->request->getPost('description'),
-            'is_active'   => $this->request->getPost('is_active') ? 1 : 0,
         ];
 
         if ($this->categoryModel->update($id, $data)) {

@@ -22,11 +22,6 @@ class CreateCategoriesTable extends Migration
                 'type' => 'TEXT',
                 'null' => true,
             ],
-            'is_active' => [
-                'type'       => 'TINYINT',
-                'constraint' => 1,
-                'default'    => 1,
-            ],
             'created_at' => [
                 'type' => 'DATETIME',
                 'null' => false,
@@ -38,7 +33,6 @@ class CreateCategoriesTable extends Migration
         ]);
 
         $this->forge->addKey('id', true);
-        $this->forge->addKey('is_active');
         $this->forge->createTable('categories');
     }
 

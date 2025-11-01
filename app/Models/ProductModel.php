@@ -21,7 +21,6 @@ class ProductModel extends Model
         'tax_rate',
         'tax_included',
         'image',
-        'is_active',
     ];
     protected $useTimestamps = true;
     protected $createdField = 'created_at';
@@ -89,12 +88,11 @@ class ProductModel extends Model
     }
 
     /**
-     * Get active products by category
+     * Get products by category
      */
     public function getProductsByCategory(int $categoryId)
     {
         return $this->where('category_id', $categoryId)
-            ->where('is_active', 1)
             ->findAll();
     }
 
