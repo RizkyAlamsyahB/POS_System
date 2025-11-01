@@ -66,7 +66,8 @@ class ProductController extends BaseController
         
         if ($imageFile && $imageFile->isValid() && !$imageFile->hasMoved()) {
             $newName = $imageFile->getRandomName();
-            $imageFile->move(WRITEPATH . 'uploads/products', $newName);
+            // Simpan di public/uploads/products agar bisa diakses via web
+            $imageFile->move(FCPATH . 'uploads/products', $newName);
             $imagePath = 'uploads/products/' . $newName;
         }
 
@@ -124,7 +125,36 @@ class ProductController extends BaseController
             return redirect()->to('/admin/products')->with('error', 'Produk tidak ditemukan!');
         }
 
-        if (!$this->validate($this->productModel->getValidationRules())) {
+        // CRITICAL: Transform SKU ke uppercase SEBELUM validasi
+        $postData = $this->request->getPost();
+        if (isset($postData['sku'])) {
+            $postData['sku'] = strtoupper($postData['sku']);
+            $_POST['sku'] = $postData['sku'];
+        }
+
+        // Validation rules dengan ignore parameter untuk is_unique
+        $rules = [
+            'category_id' => 'required|numeric',
+            'sku'         => "required|max_length[50]|is_unique[products.sku,id,{$id}]",
+            'barcode'     => "required|max_length[100]|is_unique[products.barcode,id,{$id}]",
+            'name'        => 'required|max_length[100]',
+            'unit'        => 'required|max_length[10]',
+            'price'       => 'required|decimal',
+            'cost_price'  => 'required|decimal',
+        ];
+
+        $messages = [
+            'sku' => [
+                'required'  => 'SKU harus diisi',
+                'is_unique' => 'SKU sudah digunakan produk lain',
+            ],
+            'barcode' => [
+                'required'  => 'Barcode harus diisi',
+                'is_unique' => 'Barcode sudah digunakan produk lain',
+            ],
+        ];
+
+        if (!$this->validate($rules, $messages)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
@@ -133,16 +163,22 @@ class ProductController extends BaseController
         $imageFile = $this->request->getFile('image');
         
         if ($imageFile && $imageFile->isValid() && !$imageFile->hasMoved()) {
-            // Delete old image
-            if ($product['image'] && file_exists(WRITEPATH . $product['image'])) {
-                unlink(WRITEPATH . $product['image']);
+            // Delete old image if exists
+            if ($product['image'] && file_exists(FCPATH . $product['image'])) {
+                unlink(FCPATH . $product['image']);
             }
             
             $newName = $imageFile->getRandomName();
-            $imageFile->move(WRITEPATH . 'uploads/products', $newName);
+            $imageFile->move(FCPATH . 'uploads/products', $newName);
             $imagePath = 'uploads/products/' . $newName;
+        } elseif ($this->request->getPost('delete_image')) {
+            // Handle delete image checkbox
+            if ($product['image'] && file_exists(FCPATH . $product['image'])) {
+                unlink(FCPATH . $product['image']);
+            }
+            $imagePath = null;
         }
-
+        
         $data = [
             'category_id'  => $this->request->getPost('category_id'),
             'sku'          => strtoupper($this->request->getPost('sku')),
@@ -158,13 +194,18 @@ class ProductController extends BaseController
             'image'        => $imagePath,
         ];
 
+        // Skip Model validation karena sudah divalidasi di atas dengan custom rules
+        $this->productModel->skipValidation(true);
+        
         if ($this->productModel->update($id, $data)) {
             return redirect()->to('/admin/products')->with('message', 'Produk berhasil diupdate!');
         }
 
+        log_message('error', 'Failed to update product ID: ' . $id);
+        log_message('error', 'Model errors: ' . json_encode($this->productModel->errors()));
+        
         return redirect()->back()->withInput()->with('error', 'Gagal mengupdate produk!');
     }
-
     /**
      * Delete product
      */
@@ -176,9 +217,9 @@ class ProductController extends BaseController
             return redirect()->to('/admin/products')->with('error', 'Produk tidak ditemukan!');
         }
 
-        // Delete image
-        if ($product['image'] && file_exists(WRITEPATH . $product['image'])) {
-            unlink(WRITEPATH . $product['image']);
+        // Delete image file if exists
+        if ($product['image'] && file_exists(FCPATH . $product['image'])) {
+            unlink(FCPATH . $product['image']);
         }
 
         if ($this->productModel->delete($id)) {
