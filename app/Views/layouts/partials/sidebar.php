@@ -7,11 +7,12 @@ $currentUrl = current_url();
     <div class="sidebar-header position-relative">
         <div class="d-flex justify-content-between align-items-center">
             <div class="logo">
-                <a href="/">
-                    <h4 class="mb-0 text-primary">
-                        <i class="bi bi-shop"></i> POS System
-                    </h4>
-                </a>
+                        <a href="<?= base_url() ?>">
+            <div class="sidebar-brand">
+                <i class="bi bi-shop" style="font-size: 2rem; color: #3772F0;"></i>
+                <span style="color: #3772F0; font-weight: 700;">POS System</span>
+            </div>
+        </a>
             </div>
             <div class="theme-toggle d-flex gap-2 align-items-center mt-2">
                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true"
