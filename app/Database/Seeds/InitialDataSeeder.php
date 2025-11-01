@@ -74,7 +74,7 @@ class InitialDataSeeder extends Seeder
         ]);
         $users->save($admin);
         $adminId = $users->getInsertID();
-        $this->db->table('users')->where('id', $adminId)->update(['outlet_id' => null]);
+        $this->db->table('users')->where('id', $adminId)->update(['outlet_id' => null, 'active' => 1]);
         $adminEntity = $users->findById($adminId);
         $adminEntity->addGroup('admin');
 
@@ -86,7 +86,7 @@ class InitialDataSeeder extends Seeder
         ]);
         $users->save($manager);
         $managerId = $users->getInsertID();
-        $this->db->table('users')->where('id', $managerId)->update(['outlet_id' => 1]);
+        $this->db->table('users')->where('id', $managerId)->update(['outlet_id' => 1, 'active' => 1]);
         $managerEntity = $users->findById($managerId);
         $managerEntity->addGroup('manager');
 
@@ -98,7 +98,7 @@ class InitialDataSeeder extends Seeder
         ]);
         $users->save($cashier1);
         $cashier1Id = $users->getInsertID();
-        $this->db->table('users')->where('id', $cashier1Id)->update(['outlet_id' => 1]);
+        $this->db->table('users')->where('id', $cashier1Id)->update(['outlet_id' => 1, 'active' => 1]);
         $cashier1Entity = $users->findById($cashier1Id);
         $cashier1Entity->addGroup('cashier');
 
@@ -110,7 +110,7 @@ class InitialDataSeeder extends Seeder
         ]);
         $users->save($cashier2);
         $cashier2Id = $users->getInsertID();
-        $this->db->table('users')->where('id', $cashier2Id)->update(['outlet_id' => 2]);
+        $this->db->table('users')->where('id', $cashier2Id)->update(['outlet_id' => 2, 'active' => 1]);
         $cashier2Entity = $users->findById($cashier2Id);
         $cashier2Entity->addGroup('cashier');
 

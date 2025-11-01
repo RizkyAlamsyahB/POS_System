@@ -39,9 +39,9 @@ class CreateProductsTable extends Migration
             ],
             'unit' => [
                 'type'       => 'VARCHAR',
-                'constraint' => '10',
+                'constraint' => '15',
                 'default'    => 'PCS',
-                'comment'    => 'Satuan: PCS, BOX, KG, LUSIN',
+                'comment'    => 'Satuan: PCS, CUP, BOX, PACK, KG, L, UNIT, PORSI, SET, BOTOL',
             ],
             'price' => [
                 'type'       => 'DECIMAL',
@@ -94,9 +94,9 @@ class CreateProductsTable extends Migration
         $this->forge->addUniqueKey('sku');
         $this->forge->addUniqueKey('barcode');
         $this->forge->addKey('barcode_alt');
-        
+
         $this->forge->addForeignKey('category_id', 'categories', 'id', 'RESTRICT', 'CASCADE');
-        
+
         $this->forge->createTable('products');
     }
 

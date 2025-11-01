@@ -14,32 +14,32 @@ class ProductDataSeeder extends Seeder
         $categories = [
             [
                 'name'        => 'Makanan',
-                'description' => 'Kategori produk makanan',
+                'description' => 'Menu makanan utama dan ringan',
                 'created_at'  => date('Y-m-d H:i:s'),
                 'updated_at'  => date('Y-m-d H:i:s'),
             ],
             [
                 'name'        => 'Minuman',
-                'description' => 'Kategori produk minuman',
+                'description' => 'Aneka minuman dingin dan panas',
                 'created_at'  => date('Y-m-d H:i:s'),
                 'updated_at'  => date('Y-m-d H:i:s'),
             ],
             [
-                'name'        => 'Elektronik',
-                'description' => 'Kategori produk elektronik',
+                'name'        => 'Dessert',
+                'description' => 'Makanan penutup dan kudapan manis',
                 'created_at'  => date('Y-m-d H:i:s'),
                 'updated_at'  => date('Y-m-d H:i:s'),
             ],
             [
-                'name'        => 'Perlengkapan Rumah',
-                'description' => 'Kategori perlengkapan rumah tangga',
+                'name'        => 'Tambahan',
+                'description' => 'Topping, sambal, atau bahan tambahan lainnya',
                 'created_at'  => date('Y-m-d H:i:s'),
                 'updated_at'  => date('Y-m-d H:i:s'),
             ],
         ];
 
         $this->db->table('categories')->insertBatch($categories);
-        echo "✅ Inserted 4 categories successfully.\n";
+        echo "✅ Inserted restaurant categories successfully.\n";
 
         // ==============================
         // 2️⃣  Insert Products
@@ -49,176 +49,146 @@ class ProductDataSeeder extends Seeder
             [
                 'category_id'  => 1,
                 'sku'          => 'MKN001',
-                'barcode'      => '8991234567001',
-                'barcode_alt'  => null,
-                'name'         => 'Indomie Goreng',
-                'unit'         => 'PCS',
-                'price'        => 3500.00,
-                'cost_price'   => 2800.00,
+                'barcode'      => '8990010001',
+                'name'         => 'Nasi Goreng Spesial',
+                'unit'         => 'PORSI',
+                'price'        => 25000.00,
+                'cost_price'   => 16000.00,
                 'tax_type'     => 'PPN',
                 'tax_rate'     => 11.00,
                 'tax_included' => 1,
-                'image'        => null,
-                'created_at'   => date('Y-m-d H:i:s'),
-                'updated_at'   => date('Y-m-d H:i:s'),
             ],
             [
                 'category_id'  => 1,
                 'sku'          => 'MKN002',
-                'barcode'      => '8991234567002',
-                'barcode_alt'  => null,
-                'name'         => 'Mie Sedaap Goreng',
-                'unit'         => 'PCS',
-                'price'        => 3200.00,
-                'cost_price'   => 2600.00,
+                'barcode'      => '8990010002',
+                'name'         => 'Ayam Geprek Sambal Matah',
+                'unit'         => 'PORSI',
+                'price'        => 28000.00,
+                'cost_price'   => 18000.00,
                 'tax_type'     => 'PPN',
                 'tax_rate'     => 11.00,
                 'tax_included' => 1,
-                'image'        => null,
-                'created_at'   => date('Y-m-d H:i:s'),
-                'updated_at'   => date('Y-m-d H:i:s'),
             ],
             [
                 'category_id'  => 1,
                 'sku'          => 'MKN003',
-                'barcode'      => '8991234567003',
-                'barcode_alt'  => null,
-                'name'         => 'Chitato Rasa Sapi Panggang',
-                'unit'         => 'PCS',
-                'price'        => 12000.00,
-                'cost_price'   => 9500.00,
+                'barcode'      => '8990010003',
+                'name'         => 'Spaghetti Bolognese',
+                'unit'         => 'PORSI',
+                'price'        => 32000.00,
+                'cost_price'   => 20000.00,
                 'tax_type'     => 'PPN',
                 'tax_rate'     => 11.00,
                 'tax_included' => 1,
-                'image'        => null,
-                'created_at'   => date('Y-m-d H:i:s'),
-                'updated_at'   => date('Y-m-d H:i:s'),
             ],
+
             // Minuman
             [
                 'category_id'  => 2,
                 'sku'          => 'MNM001',
-                'barcode'      => '8991234567101',
-                'barcode_alt'  => null,
-                'name'         => 'Aqua 600ml',
-                'unit'         => 'PCS',
-                'price'        => 4000.00,
-                'cost_price'   => 3200.00,
+                'barcode'      => '8990020001',
+                'name'         => 'Kopi Latte',
+                'unit'         => 'GELAS',
+                'price'        => 22000.00,
+                'cost_price'   => 12000.00,
                 'tax_type'     => 'PPN',
                 'tax_rate'     => 11.00,
                 'tax_included' => 1,
-                'image'        => null,
-                'created_at'   => date('Y-m-d H:i:s'),
-                'updated_at'   => date('Y-m-d H:i:s'),
             ],
             [
                 'category_id'  => 2,
                 'sku'          => 'MNM002',
-                'barcode'      => '8991234567102',
-                'barcode_alt'  => null,
-                'name'         => 'Coca Cola 390ml',
-                'unit'         => 'PCS',
-                'price'        => 6500.00,
-                'cost_price'   => 5000.00,
-                'tax_type'     => 'PPN',
-                'tax_rate'     => 11.00,
-                'tax_included' => 1,
-                'image'        => null,
-                'created_at'   => date('Y-m-d H:i:s'),
-                'updated_at'   => date('Y-m-d H:i:s'),
+                'barcode'      => '8990020002',
+                'name'         => 'Es Teh Manis',
+                'unit'         => 'GELAS',
+                'price'        => 8000.00,
+                'cost_price'   => 4000.00,
+                'tax_type'     => 'NONE',
+                'tax_rate'     => 0.00,
+                'tax_included' => 0,
             ],
             [
                 'category_id'  => 2,
                 'sku'          => 'MNM003',
-                'barcode'      => '8991234567103',
-                'barcode_alt'  => null,
-                'name'         => 'Teh Botol Sosro 450ml',
-                'unit'         => 'PCS',
-                'price'        => 5500.00,
-                'cost_price'   => 4200.00,
+                'barcode'      => '8990020003',
+                'name'         => 'Jus Alpukat',
+                'unit'         => 'GELAS',
+                'price'        => 18000.00,
+                'cost_price'   => 9000.00,
                 'tax_type'     => 'PPN',
                 'tax_rate'     => 11.00,
                 'tax_included' => 1,
-                'image'        => null,
-                'created_at'   => date('Y-m-d H:i:s'),
-                'updated_at'   => date('Y-m-d H:i:s'),
             ],
-            // Elektronik
+
+            // Dessert
             [
                 'category_id'  => 3,
-                'sku'          => 'ELK001',
-                'barcode'      => '8991234567201',
-                'barcode_alt'  => null,
-                'name'         => 'Baterai AA Alkaline (2pcs)',
-                'unit'         => 'PCS',
+                'sku'          => 'DST001',
+                'barcode'      => '8990030001',
+                'name'         => 'Pancake Coklat',
+                'unit'         => 'PORSI',
                 'price'        => 15000.00,
+                'cost_price'   => 9000.00,
+                'tax_type'     => 'PPN',
+                'tax_rate'     => 11.00,
+                'tax_included' => 1,
+            ],
+            [
+                'category_id'  => 3,
+                'sku'          => 'DST002',
+                'barcode'      => '8990030002',
+                'name'         => 'Cheesecake Slice',
+                'unit'         => 'POTONG',
+                'price'        => 20000.00,
                 'cost_price'   => 12000.00,
                 'tax_type'     => 'PPN',
                 'tax_rate'     => 11.00,
-                'tax_included' => 0,
-                'image'        => null,
-                'created_at'   => date('Y-m-d H:i:s'),
-                'updated_at'   => date('Y-m-d H:i:s'),
+                'tax_included' => 1,
             ],
-            [
-                'category_id'  => 3,
-                'sku'          => 'ELK002',
-                'barcode'      => '8991234567202',
-                'barcode_alt'  => null,
-                'name'         => 'Kabel USB Type-C 1m',
-                'unit'         => 'PCS',
-                'price'        => 35000.00,
-                'cost_price'   => 28000.00,
-                'tax_type'     => 'PPN',
-                'tax_rate'     => 11.00,
-                'tax_included' => 0,
-                'image'        => null,
-                'created_at'   => date('Y-m-d H:i:s'),
-                'updated_at'   => date('Y-m-d H:i:s'),
-            ],
-            // Perlengkapan Rumah
+
+            // Tambahan
             [
                 'category_id'  => 4,
-                'sku'          => 'PRT001',
-                'barcode'      => '8991234567301',
-                'barcode_alt'  => null,
-                'name'         => 'Sabun Cuci Piring 800ml',
+                'sku'          => 'TMB001',
+                'barcode'      => '8990040001',
+                'name'         => 'Telur Mata Sapi',
                 'unit'         => 'PCS',
-                'price'        => 18000.00,
-                'cost_price'   => 14500.00,
-                'tax_type'     => 'PPN',
-                'tax_rate'     => 11.00,
-                'tax_included' => 1,
-                'image'        => null,
-                'created_at'   => date('Y-m-d H:i:s'),
-                'updated_at'   => date('Y-m-d H:i:s'),
+                'price'        => 5000.00,
+                'cost_price'   => 2500.00,
+                'tax_type'     => 'NONE',
+                'tax_rate'     => 0.00,
+                'tax_included' => 0,
             ],
             [
                 'category_id'  => 4,
-                'sku'          => 'PRT002',
-                'barcode'      => '8991234567302',
-                'barcode_alt'  => null,
-                'name'         => 'Tissue Kotak 250 lembar',
-                'unit'         => 'BOX',
-                'price'        => 12500.00,
-                'cost_price'   => 9800.00,
-                'tax_type'     => 'PPN',
-                'tax_rate'     => 11.00,
-                'tax_included' => 1,
-                'image'        => null,
-                'created_at'   => date('Y-m-d H:i:s'),
-                'updated_at'   => date('Y-m-d H:i:s'),
+                'sku'          => 'TMB002',
+                'barcode'      => '8990040002',
+                'name'         => 'Keju Parut',
+                'unit'         => 'TAKARAN',
+                'price'        => 7000.00,
+                'cost_price'   => 3500.00,
+                'tax_type'     => 'NONE',
+                'tax_rate'     => 0.00,
+                'tax_included' => 0,
             ],
         ];
 
+        // Tambahkan timestamp otomatis
+        foreach ($products as &$p) {
+            $p['created_at'] = date('Y-m-d H:i:s');
+            $p['updated_at'] = date('Y-m-d H:i:s');
+            $p['image'] = null;
+        }
+
         $this->db->table('products')->insertBatch($products);
-        echo "✅ Inserted 10 products successfully.\n";
+        echo "✅ Inserted 10 restaurant products successfully.\n";
 
         // ==============================
         // 3️⃣  Insert Initial Stock for All Outlets
         // ==============================
         $outlets = $this->db->table('outlets')->get()->getResultArray();
-        $productIds = range(1, 10); // Assuming products have IDs 1-10
+        $productIds = range(1, count($products));
 
         $stocks = [];
         foreach ($outlets as $outlet) {
@@ -226,15 +196,15 @@ class ProductDataSeeder extends Seeder
                 $stocks[] = [
                     'product_id' => $productId,
                     'outlet_id'  => $outlet['id'],
-                    'stock'      => rand(20, 100), // Random stock between 20-100
+                    'stock'      => rand(10, 50),
                     'updated_at' => date('Y-m-d H:i:s'),
                 ];
             }
         }
 
         $this->db->table('product_stocks')->insertBatch($stocks);
-        echo "✅ Inserted initial stock for all outlets successfully.\n";
+        echo "✅ Initial stock for outlets inserted successfully.\n";
 
-        echo "🎉 Product data seeding completed!\n";
+        echo "🎉 Restaurant product seeding completed!\n";
     }
 }
