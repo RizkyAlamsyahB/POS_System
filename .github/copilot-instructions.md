@@ -24,24 +24,34 @@ app/
 │   ├── UserModel.php    # Extended Shield UserModel with outlet relationship
 │   └── OutletModel.php  # Outlet management
 ├── Views/             # View templates
-│   ├── layouts/       # Reusable layouts (main.php, dashboard.php, mazer.php)
-│   │   ├── mazer.php           # Mazer admin template layout
-│   │   └── partials/           # Mazer sidebar, footer components
+│   ├── layouts/       # Reusable layouts
+│   │   ├── app.php            # Main Mazer admin layout (used by admin-mazer.php)
+│   │   ├── main.php           # Simple layout (used by login)
+│   │   ├── dashboard.php      # Alternative dashboard layout
+│   │   └── partials/
+│   │       └── sidebar.php    # Dynamic sidebar based on user role
 │   ├── auth/          # Login page
-│   ├── dashboard/     # Admin & Manager dashboards (admin-mazer.php uses Mazer)
-│   └── pos/           # Cashier POS interface (index.php - custom full-screen design)
+│   ├── dashboard/     # Admin & Manager dashboards
+│   │   ├── admin-mazer.php    # Admin dashboard using Mazer template
+│   │   └── manager.php        # Manager dashboard
+│   └── pos/           # Cashier POS interface
+│       └── index.php          # Full-screen POS (extends app.php, hides sidebar)
 ├── Config/            # Configuration files
 │   ├── Auth.php       # Shield auth configuration
 │   ├── AuthGroups.php # Role and permission definitions
 │   └── Routes.php     # Application routes
 └── Database/          # Migrations and Seeds
-    ├── Migrations/    # Database schema
-    └── Seeds/         # Initial data (InitialDataSeeder.php)
+    ├── Migrations/    # Database schema versions
+    │   ├── 2025-11-01-001516_CreateOutletsTable.php
+    │   └── 2025-11-01-001528_AddOutletIdToUsersTable.php
+    └── Seeds/         # Initial data
+        └── InitialDataSeeder.php
 
 public/                # Web-accessible files (document root)
-├── mazer/             # Mazer admin template assets (CSS, JS, fonts, images)
+├── index.php          # Front controller (NOT in project root!)
+└── mazer/             # Mazer admin template assets (CSS, JS, fonts, images)
 tests/                 # PHPUnit tests
-writable/              # Cache, logs, sessions, uploads (must be writable)
+writable/              # Cache, logs, sessions, uploads (must be writable by web server)
 ```
 
 ### Namespace Conventions
@@ -86,6 +96,29 @@ After login, users are redirected based on role:
 - **cashier** → `/pos`
 
 ## Development Workflows
+
+### First-Time Setup
+```bash
+# 1. Install dependencies
+composer install
+
+# 2. Copy environment file and configure
+cp env .env
+# Edit .env to set:
+#   - CI_ENVIRONMENT = development
+#   - app.baseURL = 'http://localhost:8080/'
+#   - database.default.* (hostname, database, username, password)
+
+# 3. Run migrations (creates all tables including Shield auth tables)
+php spark migrate
+
+# 4. Seed initial data (creates 3 outlets and 4 users)
+php spark db:seed InitialDataSeeder
+
+# 5. Start development server
+php spark serve
+# Access at: http://localhost:8080
+```
 
 ### Environment Setup
 1. Copy `env` to `.env` and configure:
@@ -218,22 +251,18 @@ composer test
 - Named routes: `['as' => 'login']` allows `url_to('login')`
 
 ### Views
-- **Two layout systems in use**:
-  1. **Mazer Layout** (`layouts/mazer.php`) - For admin/manager dashboards with sidebar navigation
-  2. **Custom POS Layout** - Full-screen responsive POS interface (hides Mazer sidebar via CSS)
-- Layouts use sections: `$this->extend('layout')` and `$this->section('content')`
-- POS view hides Mazer sidebar: `#sidebar { display: none !important; }`
-- Access data as variables: `<?= esc($variable) ?>`
-- Session flash messages: `session('message')`, `session('error')`
-- CSRF protection: `<?= csrf_field() ?>` in forms
-- Example:
+- **Layout System**: Views extend base layouts using CodeIgniter's view sections
+- **Three layouts in use**:
+  1. **app.php** (`layouts/app.php`) - Main Mazer admin template with sidebar for admin/manager
+  2. **main.php** (`layouts/main.php`) - Simple layout for login page
+  3. **dashboard.php** - Alternative dashboard layout (if needed)
+- **POS Override**: `pos/index.php` extends `layouts/app` but hides sidebar via CSS for full-screen UX
+- View inheritance pattern:
   ```php
-  <?= $this->extend('layouts/mazer') ?>
+  <?= $this->extend('layouts/app') ?>
   
   <?= $this->section('styles') ?>
-  <style>
-      /* Custom styles here */
-  </style>
+  <style>/* Custom CSS */</style>
   <?= $this->endSection() ?>
   
   <?= $this->section('content') ?>
@@ -241,11 +270,13 @@ composer test
   <?= $this->endSection() ?>
   
   <?= $this->section('scripts') ?>
-  <script>
-      // Custom JS here
-  </script>
+  <script>/* Custom JS */</script>
   <?= $this->endSection() ?>
   ```
+- **Sidebar**: Dynamic menu in `layouts/partials/sidebar.php` - shows different menu items based on user role
+- Access data as variables: `<?= esc($variable) ?>`
+- Session flash messages: `session('message')`, `session('error')`
+- CSRF protection: `<?= csrf_field() ?>` in forms
 
 ### Filters (Middleware)
 - Shield provides filters: `session`, `group:admin`, `permission:users.create`
@@ -269,14 +300,14 @@ composer test
 
 ### Mazer Admin Template Integration
 - **CDN-based**: Mazer CSS/JS loaded from `https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/`
-- **Layout**: `app/Views/layouts/mazer.php` - Main admin layout with sidebar
-- **Partials**: 
-  - `layouts/partials/mazer-sidebar.php` - Dynamic sidebar based on user role
-  - `layouts/partials/mazer-footer.php` - Footer component
-- **POS Override**: POS interface extends Mazer but hides sidebar with CSS for full-screen experience
-- **Features**: Dark mode toggle, responsive sidebar, active menu highlighting
+- **Layout**: `app/Views/layouts/app.php` - Main admin layout with sidebar
+- **Partials**: `layouts/partials/sidebar.php` - Dynamic sidebar based on user role (admin/manager/cashier menus)
+- **POS Override**: POS interface extends `app.php` but hides sidebar with CSS (`#sidebar { display: none !important; }`) for full-screen experience
+- **Features**: Dark mode toggle, responsive sidebar, active menu highlighting, perfect-scrollbar
+- **Icon Library**: Iconly icons for UI components
 
 ### POS Interface Design (app/Views/pos/index.php)
+- **Layout Override**: Extends `layouts/app` but hides Mazer sidebar via CSS for full-screen cashier experience
 - **Layout**: Three-column design (category sidebar | product grid | invoice cart)
 - **Responsive**: Mobile-friendly with collapsible invoice panel
 - **Frontend Cart Management**: JavaScript-based cart with quantity controls
