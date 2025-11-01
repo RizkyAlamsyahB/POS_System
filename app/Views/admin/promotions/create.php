@@ -113,8 +113,8 @@
                                 <select class="form-select" id="outlet_id" name="outlet_id">
                                     <option value="">Semua Outlet</option>
                                     <?php foreach ($outlets as $outlet): ?>
-                                        <option value="<?= $outlet->id ?>" <?= old('outlet_id') == $outlet->id ? 'selected' : '' ?>>
-                                            <?= esc($outlet->code) ?> - <?= esc($outlet->name) ?>
+                                        <option value="<?= $outlet['id'] ?>" <?= old('outlet_id') == $outlet['id'] ? 'selected' : '' ?>>
+                                            <?= esc($outlet['code']) ?> - <?= esc($outlet['name']) ?>
                                         </option>
                                     <?php endforeach ?>
                                 </select>

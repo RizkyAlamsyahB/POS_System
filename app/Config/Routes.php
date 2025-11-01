@@ -81,11 +81,11 @@ $routes->group('manager', ['filter' => 'group:manager'], function($routes) {
     // Outlet Management (View Own Outlet Only)
     $routes->get('outlets', 'Manager\OutletController::index');
     
-    // Product Management (Read-only + Stock Update)
+    // Product & Stock Management
     $routes->get('products', 'Manager\ProductController::index');
+    $routes->get('products/datatable', 'Manager\ProductController::datatable');
     $routes->get('products/view/(:num)', 'Manager\ProductController::view/$1');
-    $routes->get('products/stock', 'Manager\ProductController::stock');
-    $routes->post('products/stock/update', 'Manager\ProductController::updateStock');
+    $routes->post('products/update-stock', 'Manager\ProductController::updateStock');
 });
 
 // POS routes (requires cashier role or above + outlet active check)

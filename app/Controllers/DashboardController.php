@@ -71,7 +71,7 @@ class DashboardController extends BaseController
         
         if ($user->outlet_id) {
             $outlet = $outletModel->find($user->outlet_id);
-            $isActive = $outlet ? (bool) $outlet->is_active : false;
+            $isActive = $outlet ? (bool) $outlet['is_active'] : false;
         }
         
         return [
