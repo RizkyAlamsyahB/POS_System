@@ -22,7 +22,7 @@
     <div id="app">
         <!-- Sidebar -->
         <div id="sidebar">
-            <?= $this->include('layouts/partials/mazer-sidebar') ?>
+            <?= $this->include('layouts/partials/sidebar') ?>
         </div>
         
         <!-- Main Content -->
@@ -52,7 +52,6 @@
             <?= $this->renderSection('content') ?>
             
             <!-- Footer -->
-            <?= $this->include('layouts/partials/mazer-footer') ?>
         </div>
     </div>
     

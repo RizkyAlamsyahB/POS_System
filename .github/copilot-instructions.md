@@ -3,7 +3,7 @@
 ## Project Overview
 This is a **Multi-Outlet Point of Sale (POS) system** built on CodeIgniter 4 framework with **CodeIgniter Shield** authentication. The system supports multiple retail outlets with role-based access control (admin, manager, cashier).
 
-**Current Branch:** `feature/auth` - Authentication system with login/logout and role-based dashboards
+**Current Branch:** `feature/admin-template-mazer` - Mazer admin template integration with functional POS interface
 
 ## Architecture & Structure
 
@@ -19,15 +19,17 @@ This is a **Multi-Outlet Point of Sale (POS) system** built on CodeIgniter 4 fra
 app/
 ├── Controllers/        # HTTP request handlers
 │   ├── AuthController.php        # Login/logout handling
-│   └── DashboardController.php   # Role-based dashboards
+│   └── DashboardController.php   # Role-based dashboards + POS
 ├── Models/            # Database models
 │   ├── UserModel.php    # Extended Shield UserModel with outlet relationship
 │   └── OutletModel.php  # Outlet management
 ├── Views/             # View templates
-│   ├── layouts/       # Reusable layouts (main.php, dashboard.php)
+│   ├── layouts/       # Reusable layouts (main.php, dashboard.php, mazer.php)
+│   │   ├── mazer.php           # Mazer admin template layout
+│   │   └── partials/           # Mazer sidebar, footer components
 │   ├── auth/          # Login page
-│   ├── dashboard/     # Admin & Manager dashboards
-│   └── pos/           # Cashier POS interface
+│   ├── dashboard/     # Admin & Manager dashboards (admin-mazer.php uses Mazer)
+│   └── pos/           # Cashier POS interface (index.php - custom full-screen design)
 ├── Config/            # Configuration files
 │   ├── Auth.php       # Shield auth configuration
 │   ├── AuthGroups.php # Role and permission definitions
@@ -37,6 +39,7 @@ app/
     └── Seeds/         # Initial data (InitialDataSeeder.php)
 
 public/                # Web-accessible files (document root)
+├── mazer/             # Mazer admin template assets (CSS, JS, fonts, images)
 tests/                 # PHPUnit tests
 writable/              # Cache, logs, sessions, uploads (must be writable)
 ```
@@ -215,16 +218,32 @@ composer test
 - Named routes: `['as' => 'login']` allows `url_to('login')`
 
 ### Views
+- **Two layout systems in use**:
+  1. **Mazer Layout** (`layouts/mazer.php`) - For admin/manager dashboards with sidebar navigation
+  2. **Custom POS Layout** - Full-screen responsive POS interface (hides Mazer sidebar via CSS)
 - Layouts use sections: `$this->extend('layout')` and `$this->section('content')`
+- POS view hides Mazer sidebar: `#sidebar { display: none !important; }`
 - Access data as variables: `<?= esc($variable) ?>`
 - Session flash messages: `session('message')`, `session('error')`
 - CSRF protection: `<?= csrf_field() ?>` in forms
 - Example:
   ```php
-  <?= $this->extend('layouts/dashboard') ?>
+  <?= $this->extend('layouts/mazer') ?>
+  
+  <?= $this->section('styles') ?>
+  <style>
+      /* Custom styles here */
+  </style>
+  <?= $this->endSection() ?>
   
   <?= $this->section('content') ?>
   <h1>Welcome, <?= esc($user->username) ?>!</h1>
+  <?= $this->endSection() ?>
+  
+  <?= $this->section('scripts') ?>
+  <script>
+      // Custom JS here
+  </script>
   <?= $this->endSection() ?>
   ```
 
@@ -235,16 +254,39 @@ composer test
 
 ## Project-Specific Context
 
-### Current State (feature/auth)
+### Current State (feature/admin-template-mazer)
 - ✅ Authentication system with Shield
 - ✅ Login/logout functionality
 - ✅ Three user roles: admin, manager, cashier
-- ✅ Role-based dashboards
+- ✅ Mazer admin template integration (CDN-based)
+- ✅ Role-based dashboards (admin-mazer.php uses Mazer template)
+- ✅ Functional POS interface with cart management, responsive design
 - ✅ Outlet management structure
-- ⏳ Product management (upcoming)
-- ⏳ POS transaction system (upcoming)
+- ⏳ Product management (upcoming - currently using mock data)
+- ⏳ Backend API for POS transactions (currently frontend-only)
 - ⏳ Promotion system (upcoming)
 - ⏳ Reporting system (upcoming)
+
+### Mazer Admin Template Integration
+- **CDN-based**: Mazer CSS/JS loaded from `https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/`
+- **Layout**: `app/Views/layouts/mazer.php` - Main admin layout with sidebar
+- **Partials**: 
+  - `layouts/partials/mazer-sidebar.php` - Dynamic sidebar based on user role
+  - `layouts/partials/mazer-footer.php` - Footer component
+- **POS Override**: POS interface extends Mazer but hides sidebar with CSS for full-screen experience
+- **Features**: Dark mode toggle, responsive sidebar, active menu highlighting
+
+### POS Interface Design (app/Views/pos/index.php)
+- **Layout**: Three-column design (category sidebar | product grid | invoice cart)
+- **Responsive**: Mobile-friendly with collapsible invoice panel
+- **Frontend Cart Management**: JavaScript-based cart with quantity controls
+- **Product Display**: Grid layout with images from Unsplash (placeholder)
+- **Current Data**: Mock products hardcoded in view (9 sample items)
+- **Payment Methods**: Credit Card, PayPal, Cash (UI only, no backend)
+- **Mobile Behavior**: 
+  - Cart slides in from right on product add
+  - Bottom-right floating cart toggle button
+  - Category sidebar hidden on very small screens
 
 ### Multi-Outlet Logic
 - Super admin (`outlet_id = NULL`) can access all outlets
@@ -273,3 +315,21 @@ When implementing POS features, follow these patterns:
 - Shield stores passwords hashed with bcrypt
 - Default redirect after login is role-based (see `AuthController::getRedirectUrl()`)
 - Bootstrap 5 and Bootstrap Icons CDN used for UI
+- Mazer admin template loaded via CDN (not bundled locally except `/public/mazer/` assets)
+
+## Next Development Priorities
+1. **Product Management Backend**:
+   - Create `products` and `categories` tables via migrations
+   - Implement CRUD controllers for admin/manager
+   - Replace POS mock data with database queries
+   
+2. **POS Backend Integration**:
+   - Create `transactions` and `transaction_details` tables
+   - API endpoint for cart submission: `POST /pos/checkout`
+   - Link transactions to `outlet_id` and `user_id`
+   
+3. **Inventory Management**:
+   - Create `product_stocks` table with outlet_id relationship
+   - Stock validation on POS checkout
+   - Low stock alerts for managers
+
