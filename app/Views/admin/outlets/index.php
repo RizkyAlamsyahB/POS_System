@@ -1,5 +1,10 @@
 <?= $this->extend('layouts/app') ?>
 
+<?= $this->section('styles') ?>
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<?= $this->endSection() ?>
+
 <?= $this->section('content') ?>
 <div class="page-heading">
     <div class="page-title">
@@ -31,7 +36,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped">
+                    <table class="table table-striped" id="outletsTable" style="width:100%">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -43,43 +48,6 @@
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php if (empty($outlets)): ?>
-                                <tr>
-                                    <td colspan="7" class="text-center">Belum ada data outlet</td>
-                                </tr>
-                            <?php else: ?>
-                                <?php foreach ($outlets as $index => $outlet): ?>
-                                    <tr>
-                                        <td><?= $index + 1 ?></td>
-                                        <td><code><?= esc($outlet->code) ?></code></td>
-                                        <td><strong><?= esc($outlet->name) ?></strong></td>
-                                        <td><?= esc($outlet->address) ?: '-' ?></td>
-                                        <td><?= esc($outlet->phone) ?: '-' ?></td>
-                                        <td>
-                                            <?php if ($outlet->is_active): ?>
-                                                <span class="badge bg-success">Aktif</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-secondary">Nonaktif</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="/admin/outlets/view/<?= $outlet->id ?>" class="btn btn-sm btn-info" title="Detail">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                                <a href="/admin/outlets/edit/<?= $outlet->id ?>" class="btn btn-sm btn-warning" title="Edit">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete(<?= $outlet->id ?>)" title="Hapus">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
                     </table>
                 </div>
             </div>
@@ -95,6 +63,10 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
 <script>
 function confirmDelete(id) {
     if (confirm('Apakah Anda yakin ingin menghapus outlet ini?')) {
@@ -103,5 +75,26 @@ function confirmDelete(id) {
         form.submit();
     }
 }
+
+$(document).ready(function() {
+    $('#outletsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '/admin/outlets/datatable',
+            type: 'GET'
+        },
+        columns: [
+            { data: 0, orderable: false },                    // No
+            { data: 1 },                                       // Kode
+            { data: 2 },                                       // Nama Outlet
+            { data: 3 },                                       // Alamat
+            { data: 4 },                                       // Telepon
+            { data: 5, orderable: true },                     // Status
+            { data: 6, orderable: false, searchable: false }, // Aksi
+        ],
+        order: [[2, 'asc']]  // Default sort by nama outlet
+    });
+});
 </script>
 <?= $this->endSection() ?>

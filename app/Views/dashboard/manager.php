@@ -36,6 +36,16 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<?php if (isset($outletInactive) && $outletInactive): ?>
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <strong>Perhatian!</strong> Outlet Anda sedang dalam status <strong>NONAKTIF</strong>. 
+    Anda tidak dapat melakukan transaksi POS atau mengubah data. 
+    Silakan hubungi administrator untuk mengaktifkan kembali outlet.
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<?php endif; ?>
+
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">
         <i class="bi bi-speedometer2"></i> Manager Dashboard

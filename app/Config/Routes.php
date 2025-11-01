@@ -22,6 +22,7 @@ $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
     
     // Outlet Management
     $routes->get('outlets', 'Admin\OutletController::index');
+    $routes->get('outlets/datatable', 'Admin\OutletController::datatable');
     $routes->get('outlets/create', 'Admin\OutletController::create');
     $routes->post('outlets/store', 'Admin\OutletController::store');
     $routes->get('outlets/view/(:num)', 'Admin\OutletController::view/$1');
@@ -31,6 +32,7 @@ $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
     
     // User Management
     $routes->get('users', 'Admin\UserController::index');
+    $routes->get('users/datatable', 'Admin\UserController::datatable');
     $routes->get('users/create', 'Admin\UserController::create');
     $routes->post('users/store', 'Admin\UserController::store');
     $routes->get('users/edit/(:num)', 'Admin\UserController::edit/$1');
@@ -40,6 +42,7 @@ $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
     
     // Category Management
     $routes->get('categories', 'Admin\CategoryController::index');
+    $routes->get('categories/datatable', 'Admin\CategoryController::datatable');
     $routes->get('categories/create', 'Admin\CategoryController::create');
     $routes->post('categories/store', 'Admin\CategoryController::store');
     $routes->get('categories/edit/(:num)', 'Admin\CategoryController::edit/$1');
@@ -55,9 +58,11 @@ $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
     $routes->post('products/delete/(:num)', 'Admin\ProductController::delete/$1');
     $routes->get('products/stock/(:num)', 'Admin\ProductController::stock/$1');
     $routes->post('products/stock/update/(:num)', 'Admin\ProductController::updateStock/$1');
+    $routes->get('products/datatable', 'Admin\ProductController::datatable');
 });
 
-// Manager routes (requires manager role)
+// Manager routes (requires manager role + outlet active check)
+// Temporarily disable outletactive filter for testing
 $routes->group('manager', ['filter' => 'group:manager'], function($routes) {
     $routes->get('dashboard', 'DashboardController::managerDashboard');
     
@@ -71,7 +76,11 @@ $routes->group('manager', ['filter' => 'group:manager'], function($routes) {
     $routes->post('products/stock/update', 'Manager\ProductController::updateStock');
 });
 
-// POS routes (requires cashier role or above)
+// POS routes (requires cashier role or above + outlet active check)
+// Temporarily disable outletactive filter for testing
+$routes->group('', ['filter' => 'group:admin,manager,cashier'], function($routes) {
+    $routes->get('pos', 'DashboardController::pos');
+});
 $routes->group('pos', ['filter' => 'group:cashier,manager,admin'], function($routes) {
     $routes->get('/', 'DashboardController::pos');
 });

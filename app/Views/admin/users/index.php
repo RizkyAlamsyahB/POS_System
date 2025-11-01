@@ -1,5 +1,10 @@
 <?= $this->extend('layouts/app') ?>
 
+<?= $this->section('styles') ?>
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<?= $this->endSection() ?>
+
 <?= $this->section('content') ?>
 <div class="page-heading">
     <div class="page-title">
@@ -30,96 +35,18 @@
                 </div>
             </div>
             <div class="card-body">
-                <?php if (session('message')): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <?= session('message') ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <?php endif; ?>
-
-                <?php if (session('error')): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <?= session('error') ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <?php endif; ?>
-
                 <div class="table-responsive">
-                    <table class="table table-striped table-hover">
+                    <table class="table table-striped table-hover" id="usersTable" style="width:100%">
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>Username</th>
-                                <th>Email</th>
+                                <th>User Info</th>
                                 <th>Role</th>
                                 <th>Outlet</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php if (empty($users)): ?>
-                                <tr>
-                                    <td colspan="7" class="text-center">Belum ada data user</td>
-                                </tr>
-                            <?php else: ?>
-                                <?php foreach ($users as $index => $user): ?>
-                                    <tr>
-                                        <td><?= $index + 1 ?></td>
-                                        <td>
-                                            <strong><?= esc($user->username) ?></strong>
-                                            <?php if ($user->id == auth()->id()): ?>
-                                                <span class="badge bg-info">You</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td><?= esc($user->secret) ?: '-' ?></td>
-                                        <td>
-                                            <?php
-                                            $role = $user->groups[0] ?? 'No Role';
-                                            $badgeClass = match($role) {
-                                                'admin' => 'bg-danger',
-                                                'manager' => 'bg-warning',
-                                                'cashier' => 'bg-info',
-                                                default => 'bg-secondary'
-                                            };
-                                            ?>
-                                            <span class="badge <?= $badgeClass ?>"><?= ucfirst($role) ?></span>
-                                        </td>
-                                        <td>
-                                            <?php if (isset($user->outlet)): ?>
-                                                <code><?= esc($user->outlet->code) ?></code> - <?= esc($user->outlet->name) ?>
-                                            <?php else: ?>
-                                                <span class="text-muted">All Outlets</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php if ($user->active): ?>
-                                                <span class="badge bg-success">Aktif</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-secondary">Nonaktif</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="/admin/users/edit/<?= $user->id ?>" class="btn btn-sm btn-warning" title="Edit">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                                <?php if ($user->id != auth()->id()): ?>
-                                                    <button type="button" class="btn btn-sm btn-<?= $user->active ? 'secondary' : 'success' ?>" 
-                                                            onclick="toggleStatus(<?= $user->id ?>)" 
-                                                            title="<?= $user->active ? 'Nonaktifkan' : 'Aktifkan' ?>">
-                                                        <i class="bi bi-<?= $user->active ? 'pause' : 'play' ?>-circle"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete(<?= $user->id ?>)" title="Hapus">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                <?php endif; ?>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
                     </table>
                 </div>
             </div>
@@ -140,6 +67,10 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
 <script>
 function confirmDelete(id) {
     if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
@@ -154,5 +85,25 @@ function toggleStatus(id) {
     form.action = '/admin/users/toggle-status/' + id;
     form.submit();
 }
+
+$(document).ready(function() {
+    $('#usersTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '/admin/users/datatable',
+            type: 'GET'
+        },
+        columns: [
+            { data: 0, orderable: false },                    // No
+            { data: 1 },                                       // User Info (username + email)
+            { data: 2 },                                       // Role
+            { data: 3 },                                       // Outlet
+            { data: 4 },                                       // Status
+            { data: 5, orderable: false, searchable: false }, // Aksi
+        ],
+        order: [[1, 'asc']]  // Default sort by username
+    });
+});
 </script>
 <?= $this->endSection() ?>

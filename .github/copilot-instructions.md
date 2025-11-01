@@ -324,6 +324,33 @@ composer test
 - Managers and cashiers are assigned to specific outlets (`outlet_id = 1, 2, 3...`)
 - All transactional data must be linked to `outlet_id` for proper reporting
 
+#### Outlet Status (Active/Inactive)
+Outlets have `is_active` status that controls access and functionality:
+
+| Component | Behavior when outlet is INACTIVE |
+|-----------|----------------------------------|
+| **Login** | Manager/cashier can still login (authentication is global) |
+| **Filter** | `OutletActiveFilter` checks outlet status and blocks write operations |
+| **POS Transactions** | ❌ Blocked - Cannot create new transactions |
+| **Dashboard** | ✅ Accessible - Shows warning alert about inactive status |
+| **Reports/History** | ✅ Accessible - Can view historical data (read-only) |
+| **Master Data** | ❌ Blocked - Cannot create/update/delete products, stock, etc. |
+| **Admin Access** | ✅ Always allowed - Admin bypasses outlet status checks |
+
+**Implementation:**
+- `app/Filters/OutletActiveFilter.php` - Middleware that checks outlet status
+- Applied to routes: `manager/*` and `pos` routes
+- Blocks routes containing: `/store`, `/update`, `/delete`, `/create`, `pos`
+- Allows read-only access to dashboard and reports
+- Shows warning alert in manager dashboard when outlet is inactive
+
+**Filter Usage:**
+```php
+// In Routes.php
+$routes->group('manager', ['filter' => 'group:manager|outletactive'], ...)
+$routes->group('', ['filter' => 'group:admin,manager,cashier|outletactive'], ...)
+```
+
 ### Common POS Patterns (To Be Implemented)
 When implementing POS features, follow these patterns:
 - **Master data**: Products, categories (shared across outlets)

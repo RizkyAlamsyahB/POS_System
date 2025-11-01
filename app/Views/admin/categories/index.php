@@ -1,5 +1,10 @@
 <?= $this->extend('layouts/app') ?>
 
+<?= $this->section('styles') ?>
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<?= $this->endSection() ?>
+
 <?= $this->section('content') ?>
 <div class="page-heading">
     <div class="page-title">
@@ -31,7 +36,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped">
+                    <table class="table table-striped" id="categoriesTable" style="width:100%">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -41,34 +46,6 @@
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php if (empty($categories)): ?>
-                                <tr>
-                                    <td colspan="5" class="text-center">Belum ada data kategori</td>
-                                </tr>
-                            <?php else: ?>
-                                <?php foreach ($categories as $index => $category): ?>
-                                    <tr>
-                                        <td><?= $index + 1 ?></td>
-                                        <td><strong><?= esc($category['name']) ?></strong></td>
-                                        <td><?= esc($category['description']) ?: '-' ?></td>
-                                        <td>
-                                            <span class="badge bg-info"><?= $category['product_count'] ?> produk</span>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="/admin/categories/edit/<?= $category['id'] ?>" class="btn btn-sm btn-warning">
-                                                    <i class="bi bi-pencil"></i> Edit
-                                                </a>
-                                                <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete(<?= $category['id'] ?>)">
-                                                    <i class="bi bi-trash"></i> Hapus
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
                     </table>
                 </div>
             </div>
@@ -84,6 +61,10 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
 <script>
 function confirmDelete(id) {
     if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
@@ -92,5 +73,24 @@ function confirmDelete(id) {
         form.submit();
     }
 }
+
+$(document).ready(function() {
+    $('#categoriesTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '/admin/categories/datatable',
+            type: 'GET'
+        },
+        columns: [
+            { data: 0, orderable: false },                    // No
+            { data: 1 },                                       // Nama Kategori
+            { data: 2 },                                       // Deskripsi
+            { data: 3, orderable: true },                     // Jumlah Produk
+            { data: 4, orderable: false, searchable: false }, // Aksi
+        ],
+        order: [[1, 'asc']]  // Default sort by nama kategori
+    });
+});
 </script>
 <?= $this->endSection() ?>
