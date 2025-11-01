@@ -59,6 +59,18 @@ $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
     $routes->get('products/stock/(:num)', 'Admin\ProductController::stock/$1');
     $routes->post('products/stock/update/(:num)', 'Admin\ProductController::updateStock/$1');
     $routes->get('products/datatable', 'Admin\ProductController::datatable');
+    
+    // Promotion Management
+    $routes->get('promotions', 'Admin\PromotionController::index');
+    $routes->get('promotions/datatable', 'Admin\PromotionController::datatable');
+    $routes->get('promotions/create', 'Admin\PromotionController::create');
+    $routes->post('promotions/store', 'Admin\PromotionController::store');
+    $routes->get('promotions/edit/(:num)', 'Admin\PromotionController::edit/$1');
+    $routes->post('promotions/update/(:num)', 'Admin\PromotionController::update/$1');
+    $routes->post('promotions/delete/(:num)', 'Admin\PromotionController::delete/$1');
+    $routes->get('promotions/manage-items/(:num)', 'Admin\PromotionController::manageItems/$1');
+    $routes->post('promotions/add-items/(:num)', 'Admin\PromotionController::addItems/$1');
+    $routes->post('promotions/remove-item/(:num)/(:num)', 'Admin\PromotionController::removeItem/$1/$2');
 });
 
 // Manager routes (requires manager role + outlet active check)
