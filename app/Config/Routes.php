@@ -29,6 +29,15 @@ $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
     $routes->post('outlets/update/(:num)', 'Admin\OutletController::update/$1');
     $routes->post('outlets/delete/(:num)', 'Admin\OutletController::delete/$1');
     
+    // User Management
+    $routes->get('users', 'Admin\UserController::index');
+    $routes->get('users/create', 'Admin\UserController::create');
+    $routes->post('users/store', 'Admin\UserController::store');
+    $routes->get('users/edit/(:num)', 'Admin\UserController::edit/$1');
+    $routes->post('users/update/(:num)', 'Admin\UserController::update/$1');
+    $routes->post('users/delete/(:num)', 'Admin\UserController::delete/$1');
+    $routes->post('users/toggle-status/(:num)', 'Admin\UserController::toggleStatus/$1');
+    
     // Category Management
     $routes->get('categories', 'Admin\CategoryController::index');
     $routes->get('categories/create', 'Admin\CategoryController::create');
