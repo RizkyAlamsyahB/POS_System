@@ -38,14 +38,13 @@
                                 <th>Nama Kategori</th>
                                 <th>Deskripsi</th>
                                 <th>Jumlah Produk</th>
-                                <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($categories)): ?>
                                 <tr>
-                                    <td colspan="6" class="text-center">Belum ada data kategori</td>
+                                    <td colspan="5" class="text-center">Belum ada data kategori</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($categories as $index => $category): ?>
@@ -55,13 +54,6 @@
                                         <td><?= esc($category['description']) ?: '-' ?></td>
                                         <td>
                                             <span class="badge bg-info"><?= $category['product_count'] ?> produk</span>
-                                        </td>
-                                        <td>
-                                            <?php if ($category['is_active']): ?>
-                                                <span class="badge bg-success">Aktif</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-secondary">Nonaktif</span>
-                                            <?php endif; ?>
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">

@@ -40,16 +40,6 @@
                                 <?php endif; ?>
                             </div>
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="is_active" class="form-label">Status</label>
-                                <select class="form-select" id="is_active" name="is_active">
-                                    <option value="1" selected>Aktif</option>
-                                    <option value="0">Nonaktif</option>
-                                </select>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="form-group mb-3">
