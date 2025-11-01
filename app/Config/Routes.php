@@ -20,6 +20,15 @@ $routes->get('logout', 'AuthController::logout');
 $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
     $routes->get('dashboard', 'DashboardController::adminDashboard');
     
+    // Outlet Management
+    $routes->get('outlets', 'Admin\OutletController::index');
+    $routes->get('outlets/create', 'Admin\OutletController::create');
+    $routes->post('outlets/store', 'Admin\OutletController::store');
+    $routes->get('outlets/view/(:num)', 'Admin\OutletController::view/$1');
+    $routes->get('outlets/edit/(:num)', 'Admin\OutletController::edit/$1');
+    $routes->post('outlets/update/(:num)', 'Admin\OutletController::update/$1');
+    $routes->post('outlets/delete/(:num)', 'Admin\OutletController::delete/$1');
+    
     // Category Management
     $routes->get('categories', 'Admin\CategoryController::index');
     $routes->get('categories/create', 'Admin\CategoryController::create');
@@ -42,6 +51,9 @@ $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
 // Manager routes (requires manager role)
 $routes->group('manager', ['filter' => 'group:manager'], function($routes) {
     $routes->get('dashboard', 'DashboardController::managerDashboard');
+    
+    // Outlet Management (View Own Outlet Only)
+    $routes->get('outlets', 'Manager\OutletController::index');
     
     // Product Management (Read-only + Stock Update)
     $routes->get('products', 'Manager\ProductController::index');
