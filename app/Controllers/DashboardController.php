@@ -16,7 +16,7 @@ class DashboardController extends BaseController
             'user'  => auth()->user(),
         ];
 
-        return view('dashboard/admin', $data);
+        return view('dashboard/admin-mazer', $data);
     }
 
     /**
