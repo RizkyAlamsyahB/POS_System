@@ -19,11 +19,35 @@ $routes->get('logout', 'AuthController::logout');
 // Admin routes (requires admin role)
 $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
     $routes->get('dashboard', 'DashboardController::adminDashboard');
+    
+    // Category Management
+    $routes->get('categories', 'Admin\CategoryController::index');
+    $routes->get('categories/create', 'Admin\CategoryController::create');
+    $routes->post('categories/store', 'Admin\CategoryController::store');
+    $routes->get('categories/edit/(:num)', 'Admin\CategoryController::edit/$1');
+    $routes->post('categories/update/(:num)', 'Admin\CategoryController::update/$1');
+    $routes->post('categories/delete/(:num)', 'Admin\CategoryController::delete/$1');
+    
+    // Product Management
+    $routes->get('products', 'Admin\ProductController::index');
+    $routes->get('products/create', 'Admin\ProductController::create');
+    $routes->post('products/store', 'Admin\ProductController::store');
+    $routes->get('products/edit/(:num)', 'Admin\ProductController::edit/$1');
+    $routes->post('products/update/(:num)', 'Admin\ProductController::update/$1');
+    $routes->post('products/delete/(:num)', 'Admin\ProductController::delete/$1');
+    $routes->get('products/stock/(:num)', 'Admin\ProductController::stock/$1');
+    $routes->post('products/stock/update/(:num)', 'Admin\ProductController::updateStock/$1');
 });
 
 // Manager routes (requires manager role)
 $routes->group('manager', ['filter' => 'group:manager'], function($routes) {
     $routes->get('dashboard', 'DashboardController::managerDashboard');
+    
+    // Product Management (Read-only + Stock Update)
+    $routes->get('products', 'Manager\ProductController::index');
+    $routes->get('products/view/(:num)', 'Manager\ProductController::view/$1');
+    $routes->get('products/stock', 'Manager\ProductController::stock');
+    $routes->post('products/stock/update', 'Manager\ProductController::updateStock');
 });
 
 // POS routes (requires cashier role or above)
