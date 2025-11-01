@@ -1,5 +1,10 @@
 <?= $this->extend('layouts/app') ?>
 
+<?= $this->section('styles') ?>
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<?= $this->endSection() ?>
+
 <?= $this->section('content') ?>
 <div class="page-heading">
     <div class="page-title">
@@ -31,7 +36,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped" id="productsTable">
+                    <table class="table table-striped" id="productsTable" style="width:100%">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -41,41 +46,10 @@
                                 <th>Kategori</th>
                                 <th>Harga Jual</th>
                                 <th>HPP</th>
+                                <th>Stok</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php if (empty($products)): ?>
-                                <tr>
-                                    <td colspan="8" class="text-center">Belum ada data produk</td>
-                                </tr>
-                            <?php else: ?>
-                                <?php foreach ($products as $index => $product): ?>
-                                    <tr>
-                                        <td><?= $index + 1 ?></td>
-                                        <td><code><?= esc($product['sku']) ?></code></td>
-                                        <td><code><?= esc($product['barcode']) ?></code></td>
-                                        <td><strong><?= esc($product['name']) ?></strong></td>
-                                        <td><?= esc($product['category_name']) ?></td>
-                                        <td>Rp <?= number_format($product['price'], 0, ',', '.') ?></td>
-                                        <td>Rp <?= number_format($product['cost_price'], 0, ',', '.') ?></td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="/admin/products/stock/<?= $product['id'] ?>" class="btn btn-sm btn-info" title="Kelola Stok">
-                                                    <i class="bi bi-box-seam"></i>
-                                                </a>
-                                                <a href="/admin/products/edit/<?= $product['id'] ?>" class="btn btn-sm btn-warning" title="Edit">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete(<?= $product['id'] ?>)" title="Hapus">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </tbody>
                     </table>
                 </div>
             </div>
@@ -91,6 +65,10 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
 <script>
 function confirmDelete(id) {
     if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
@@ -99,5 +77,28 @@ function confirmDelete(id) {
         form.submit();
     }
 }
+
+$(document).ready(function() {
+    $('#productsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '/admin/products/datatable',
+            type: 'GET'
+        },
+        columns: [
+            { data: 0, orderable: false },                    // No
+            { data: 1 },                                       // SKU
+            { data: 2 },                                       // Barcode
+            { data: 3 },                                       // Nama Produk
+            { data: 4 },                                       // Kategori
+            { data: 5 },                                       // Harga Jual
+            { data: 6 },                                       // HPP
+            { data: 7, orderable: true },                     // Stok (sortable)
+            { data: 8, orderable: false, searchable: false }, // Aksi
+        ],
+        order: [[3, 'asc']]  // Default sort by nama produk
+    });
+});
 </script>
 <?= $this->endSection() ?>

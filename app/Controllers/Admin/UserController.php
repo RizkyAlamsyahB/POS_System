@@ -23,23 +23,137 @@ class UserController extends BaseController
      */
     public function index()
     {
-        $users = $this->userModel->findAll();
-        
-        // Get outlet info for each user
-        foreach ($users as $user) {
-            if ($user->outlet_id) {
-                $user->outlet = $this->outletModel->find($user->outlet_id);
-            }
-            // Get user groups (roles)
-            $user->groups = $user->getGroups();
-        }
-
         $data = [
             'title' => 'Manajemen User',
-            'users' => $users,
         ];
 
         return view('admin/users/index', $data);
+    }
+
+    /**
+     * DataTable server-side endpoint
+     */
+    public function datatable()
+    {
+        $request = $this->request;
+        
+        // Get DataTable parameters
+        $draw = intval($request->getGet('draw') ?? 0);
+        $start = intval($request->getGet('start') ?? 0);
+        $length = intval($request->getGet('length') ?? 10);
+        
+        // Get search value
+        $searchValue = $request->getGet('search');
+        $search = is_array($searchValue) ? ($searchValue['value'] ?? '') : '';
+        
+        // Get order parameters
+        $orderData = $request->getGet('order');
+        $orderCol = 0;
+        $orderDir = 'asc';
+        
+        if (is_array($orderData) && isset($orderData[0])) {
+            $orderCol = intval($orderData[0]['column'] ?? 0);
+            $orderDir = $orderData[0]['dir'] ?? 'asc';
+        }
+
+        // Column mapping
+        $columns = [
+            0 => 'users.id',
+            1 => 'users.username',
+            2 => 'auth_identities.secret', // email
+            3 => 'outlets.name',
+            4 => 'users.active',
+            5 => 'users.id' // Actions
+        ];
+        
+        $orderBy = isset($columns[$orderCol]) ? $columns[$orderCol] : 'users.username';
+        $orderDir = ($orderDir === 'desc') ? 'DESC' : 'ASC';
+
+        // Build query with proper joins
+        $db = \Config\Database::connect();
+        $builder = $db->table('users');
+        $builder->select('users.id, users.username, users.outlet_id, users.active, outlets.name as outlet_name, auth_identities.secret as email')
+                ->join('outlets', 'outlets.id = users.outlet_id', 'left')
+                ->join('auth_identities', 'auth_identities.user_id = users.id AND auth_identities.type = "email_password"', 'left')
+                ->join('auth_groups_users', 'auth_groups_users.user_id = users.id', 'left')
+                ->where('auth_groups_users.group !=', 'admin'); // Exclude admin users
+
+        // Apply search filter
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('users.username', $search)
+                ->orLike('auth_identities.secret', $search)
+                ->orLike('outlets.name', $search)
+            ->groupEnd();
+        }
+
+        // Get total records (excluding admin)
+        $totalBuilder = $db->table('users');
+        $totalRecords = $totalBuilder->join('auth_groups_users', 'auth_groups_users.user_id = users.id', 'left')
+                                     ->where('auth_groups_users.group !=', 'admin')
+                                     ->countAllResults();
+        
+        // Get filtered records count
+        $filteredRecords = $builder->countAllResults(false);
+
+        // Apply ordering and pagination
+        $users = $builder->orderBy($orderBy, $orderDir)
+                        ->limit($length, $start)
+                        ->get()
+                        ->getResultArray();
+
+        // Get user roles
+        $userIds = array_column($users, 'id');
+        $roles = [];
+        
+        if (!empty($userIds)) {
+            $roleBuilder = $db->table('auth_groups_users');
+            $userRoles = $roleBuilder->select('user_id, group')
+                                    ->whereIn('user_id', $userIds)
+                                    ->get()
+                                    ->getResultArray();
+            
+            foreach ($userRoles as $role) {
+                $roles[$role['user_id']] = $role['group'];
+            }
+        }
+
+        // Format data for DataTable
+        $data = [];
+        foreach ($users as $index => $user) {
+            $statusBadge = $user['active'] 
+                ? '<span class="badge bg-success">Aktif</span>' 
+                : '<span class="badge bg-danger">Nonaktif</span>';
+            
+            $role = $roles[$user['id']] ?? 'unknown';
+            $roleBadge = match($role) {
+                'admin' => '<span class="badge bg-danger">Admin</span>',
+                'manager' => '<span class="badge bg-primary">Manager</span>',
+                'cashier' => '<span class="badge bg-info">Cashier</span>',
+                default => '<span class="badge bg-secondary">-</span>',
+            };
+            
+            $outletInfo = $user['outlet_name'] 
+                ? esc($user['outlet_name'])
+                : '<small class="text-muted">Super Admin (All Outlets)</small>';
+            
+            $data[] = [
+                $start + $index + 1,
+                '<strong>' . esc($user['username']) . '</strong><br><small class="text-muted">' . esc($user['email'] ?? '-') . '</small>',
+                $roleBadge,
+                $outletInfo,
+                $statusBadge,
+                view('admin/users/_actions', ['user' => $user]),
+            ];
+        }
+
+        // Return JSON response
+        return $this->response->setJSON([
+            'draw' => $draw,
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $data,
+        ]);
     }
 
     /**

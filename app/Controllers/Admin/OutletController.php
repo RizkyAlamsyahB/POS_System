@@ -25,10 +25,101 @@ class OutletController extends BaseController
         $data = [
             'title'   => 'Kelola Outlet',
             'user'    => auth()->user(),
-            'outlets' => $this->outletModel->findAll(),
         ];
 
         return view('admin/outlets/index', $data);
+    }
+
+    /**
+     * DataTable server-side endpoint
+     */
+    public function datatable()
+    {
+        $request = $this->request;
+        
+        // Get DataTable parameters
+        $draw = intval($request->getGet('draw') ?? 0);
+        $start = intval($request->getGet('start') ?? 0);
+        $length = intval($request->getGet('length') ?? 10);
+        
+        // Get search value
+        $searchValue = $request->getGet('search');
+        $search = is_array($searchValue) ? ($searchValue['value'] ?? '') : '';
+        
+        // Get order parameters
+        $orderData = $request->getGet('order');
+        $orderCol = 0;
+        $orderDir = 'asc';
+        
+        if (is_array($orderData) && isset($orderData[0])) {
+            $orderCol = intval($orderData[0]['column'] ?? 0);
+            $orderDir = $orderData[0]['dir'] ?? 'asc';
+        }
+
+        // Column mapping
+        $columns = [
+            0 => 'id',
+            1 => 'code',
+            2 => 'name',
+            3 => 'address',
+            4 => 'phone',
+            5 => 'is_active',
+            6 => 'id' // Actions
+        ];
+        
+        $orderBy = isset($columns[$orderCol]) ? $columns[$orderCol] : 'name';
+        $orderDir = ($orderDir === 'desc') ? 'DESC' : 'ASC';
+
+        // Build query
+        $builder = $this->outletModel->builder();
+
+        // Apply search filter
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('code', $search)
+                ->orLike('name', $search)
+                ->orLike('address', $search)
+                ->orLike('phone', $search)
+            ->groupEnd();
+        }
+
+        // Get total records
+        $totalRecords = $this->outletModel->countAll();
+        
+        // Get filtered records count
+        $filteredRecords = $builder->countAllResults(false);
+
+        // Apply ordering and pagination
+        $outlets = $builder->orderBy($orderBy, $orderDir)
+                          ->limit($length, $start)
+                          ->get()
+                          ->getResultArray();
+
+        // Format data for DataTable
+        $data = [];
+        foreach ($outlets as $index => $outlet) {
+            $statusBadge = $outlet['is_active'] 
+                ? '<span class="badge bg-success">Aktif</span>' 
+                : '<span class="badge bg-danger">Nonaktif</span>';
+            
+            $data[] = [
+                $start + $index + 1,
+                '<code>' . esc($outlet['code']) . '</code>',
+                '<strong>' . esc($outlet['name']) . '</strong>',
+                esc($outlet['address'] ?? '-'),
+                esc($outlet['phone'] ?? '-'),
+                $statusBadge,
+                view('admin/outlets/_actions', ['outlet' => $outlet]),
+            ];
+        }
+
+        // Return JSON response
+        return $this->response->setJSON([
+            'draw' => $draw,
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $data,
+        ]);
     }
 
     /**
@@ -100,35 +191,69 @@ class OutletController extends BaseController
      */
     public function update($id)
     {
+        log_message('info', '=== UPDATE OUTLET START ===');
+        log_message('info', 'Outlet ID: ' . $id);
+        
         $outlet = $this->outletModel->find($id);
 
         if (!$outlet) {
+            log_message('error', 'Outlet tidak ditemukan dengan ID: ' . $id);
             return redirect()->to('/admin/outlets')->with('error', 'Outlet tidak ditemukan!');
         }
 
+        log_message('info', 'Outlet ditemukan: ' . json_encode($outlet));
+
+        // Validation rules with proper is_unique exception
         $rules = [
-            'code'    => "required|max_length[20]|is_unique[outlets.code,id,{$id}]",
-            'name'    => 'required|max_length[100]',
+            'code'    => [
+                'rules' => "required|max_length[20]|is_unique[outlets.code,id,{$id}]",
+                'errors' => [
+                    'required' => 'Kode outlet harus diisi',
+                    'is_unique' => 'Kode outlet sudah digunakan oleh outlet lain',
+                ]
+            ],
+            'name'    => [
+                'rules' => 'required|max_length[100]',
+                'errors' => [
+                    'required' => 'Nama outlet harus diisi',
+                ]
+            ],
             'phone'   => 'permit_empty|max_length[20]',
             'address' => 'permit_empty',
         ];
 
         if (!$this->validate($rules)) {
+            log_message('error', 'Validation failed: ' . json_encode($this->validator->getErrors()));
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
+
+        $isActiveRaw = $this->request->getPost('is_active');
+        log_message('info', 'is_active RAW value: ' . var_export($isActiveRaw, true));
+        log_message('info', 'is_active type: ' . gettype($isActiveRaw));
 
         $data = [
             'code'      => strtoupper($this->request->getPost('code')),
             'name'      => $this->request->getPost('name'),
             'address'   => $this->request->getPost('address'),
             'phone'     => $this->request->getPost('phone'),
-            'is_active' => $this->request->getPost('is_active') ? 1 : 0,
+            'is_active' => (int) $isActiveRaw,
         ];
 
-        if ($this->outletModel->update($id, $data)) {
+        log_message('info', 'Data to update: ' . json_encode($data));
+
+        // Skip model validation since we already validated
+        $this->outletModel->skipValidation(true);
+        $updateResult = $this->outletModel->update($id, $data);
+        $this->outletModel->skipValidation(false);
+        
+        log_message('info', 'Update result: ' . var_export($updateResult, true));
+
+        if ($updateResult) {
+            log_message('info', 'Update BERHASIL');
             return redirect()->to('/admin/outlets')->with('message', 'Outlet berhasil diupdate!');
         }
 
+        log_message('error', 'Update GAGAL - Model errors: ' . json_encode($this->outletModel->errors()));
         return redirect()->back()->withInput()->with('error', 'Gagal mengupdate outlet!');
     }
 

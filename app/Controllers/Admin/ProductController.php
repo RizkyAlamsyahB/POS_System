@@ -31,10 +31,142 @@ class ProductController extends BaseController
         $data = [
             'title'    => 'Master Produk',
             'user'     => auth()->user(),
-            'products' => $this->productModel->getProductsWithCategory(),
         ];
 
         return view('admin/products/index', $data);
+    }
+
+    /**
+     * DataTable server-side endpoint
+     */
+    public function datatable()
+    {
+        $request = $this->request;
+        
+        // Get DataTable parameters
+        $draw = intval($request->getGet('draw') ?? 0);
+        $start = intval($request->getGet('start') ?? 0);
+        $length = intval($request->getGet('length') ?? 10);
+        
+        // Get search value
+        $searchValue = $request->getGet('search');
+        $search = is_array($searchValue) ? ($searchValue['value'] ?? '') : '';
+        
+        // Get order parameters
+        $orderData = $request->getGet('order');
+        $orderCol = 0;
+        $orderDir = 'asc';
+        
+        if (is_array($orderData) && isset($orderData[0])) {
+            $orderCol = intval($orderData[0]['column'] ?? 0);
+            $orderDir = $orderData[0]['dir'] ?? 'asc';
+        }
+
+        // Column mapping (match with DataTable columns)
+        $columns = [
+            0 => 'products.id',           // No (we'll use this for row number)
+            1 => 'products.sku',
+            2 => 'products.barcode',
+            3 => 'products.name',
+            4 => 'categories.name',
+            5 => 'products.price',
+            6 => 'products.cost_price',
+            7 => 'total_stock',           // Total stock
+            8 => 'products.id'            // Actions (not orderable)
+        ];
+        
+        $orderBy = isset($columns[$orderCol]) ? $columns[$orderCol] : 'products.name';
+        $orderDir = ($orderDir === 'desc') ? 'DESC' : 'ASC';
+
+        // Build query - Using proper JOIN with stock aggregation
+        $db = \Config\Database::connect();
+        $builder = $db->table('products');
+        $builder->select('products.*, categories.name as category_name, COALESCE(SUM(product_stocks.stock), 0) as total_stock')
+                ->join('categories', 'categories.id = products.category_id', 'left')
+                ->join('product_stocks', 'product_stocks.product_id = products.id', 'left')
+                ->groupBy('products.id');
+
+        // Apply search filter
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('products.name', $search)
+                ->orLike('products.sku', $search)
+                ->orLike('products.barcode', $search)
+                ->orLike('categories.name', $search)
+            ->groupEnd();
+        }
+
+        // Get total records (before filtering)
+        $totalRecords = $this->productModel->countAll();
+        
+        // Get filtered records count (need to clone builder for count)
+        $builderCount = clone $builder;
+        $filteredRecords = $builderCount->countAllResults(false);
+
+        // Apply ordering and pagination
+        $products = $builder->orderBy($orderBy, $orderDir)
+                           ->limit($length, $start)
+                           ->get()
+                           ->getResultArray();
+
+        // Get stock details per outlet for each product
+        $productIds = array_column($products, 'id');
+        $stockDetails = [];
+        
+        if (!empty($productIds)) {
+            $stockBuilder = $db->table('product_stocks');
+            $stocks = $stockBuilder->select('product_stocks.product_id, product_stocks.stock, outlets.name as outlet_name')
+                                   ->join('outlets', 'outlets.id = product_stocks.outlet_id', 'left')
+                                   ->whereIn('product_stocks.product_id', $productIds)
+                                   ->get()
+                                   ->getResultArray();
+            
+            foreach ($stocks as $stock) {
+                $stockDetails[$stock['product_id']][] = [
+                    'outlet' => $stock['outlet_name'],
+                    'stock' => $stock['stock']
+                ];
+            }
+        }
+
+        // Format data for DataTable
+        $data = [];
+        foreach ($products as $index => $product) {
+            // Build stock info HTML
+            $stockHtml = '<strong>' . number_format($product['total_stock'], 0, ',', '.') . '</strong>';
+            
+            if (isset($stockDetails[$product['id']])) {
+                $stockHtml .= '<br><small class="text-muted">';
+                $stockItems = [];
+                foreach ($stockDetails[$product['id']] as $detail) {
+                    $stockItems[] = $detail['outlet'] . ': ' . $detail['stock'];
+                }
+                $stockHtml .= implode('<br>', $stockItems);
+                $stockHtml .= '</small>';
+            } else {
+                $stockHtml .= '<br><small class="text-warning">Belum ada stok</small>';
+            }
+            
+            $data[] = [
+                $start + $index + 1,                                           // No
+                '<code>' . esc($product['sku']) . '</code>',                   // SKU
+                '<code>' . esc($product['barcode']) . '</code>',              // Barcode
+                '<strong>' . esc($product['name']) . '</strong>',             // Nama Produk
+                esc($product['category_name'] ?? '-'),                        // Kategori
+                'Rp ' . number_format($product['price'], 0, ',', '.'),       // Harga Jual
+                'Rp ' . number_format($product['cost_price'], 0, ',', '.'),  // HPP
+                $stockHtml,                                                    // Stok Total + Detail per outlet
+                view('admin/products/_actions', ['product' => $product]),     // Actions
+            ];
+        }
+
+        // Return JSON response
+        return $this->response->setJSON([
+            'draw' => $draw,
+            'recordsTotal' => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data' => $data,
+        ]);
     }
 
     /**
