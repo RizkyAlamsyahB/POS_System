@@ -3,7 +3,7 @@
 ## Project Overview
 This is a **Multi-Outlet Point of Sale (POS) system** built on CodeIgniter 4 framework with **CodeIgniter Shield** authentication. The system supports multiple retail outlets with role-based access control (admin, manager, cashier).
 
-**Current Branch:** `feature/admin-template-mazer` - Mazer admin template integration with functional POS interface
+**Current Branch:** `dev` - Main development branch with complete POS functionality
 
 ## Architecture & Structure
 
@@ -191,20 +191,39 @@ composer test
    - Fields: `name`, `address`, `phone`, `is_active`
 
 2. **users** - Shield users table (extended)
-   - Extended with: `outlet_id` (NULL = super admin)
+   - Extended with: `outlet_id` (NULL = super admin), `active` (user account status)
    - Shield manages: password hashing, email verification, authentication
 
 3. **auth_groups_users** - Shield's role assignment table
    - Links users to groups (admin/manager/cashier)
 
-### Upcoming Tables (Not Yet Implemented)
-- **categories** - Product categories
-- **products** - Product master data with barcode, SKU, pricing, tax
-- **product_stocks** - Stock per outlet
-- **promotions** - Promotion/discount master with date/time/outlet scope
-- **promotion_items** - Products eligible for promotions
-- **transactions** - Sales transaction headers
-- **transaction_details** - Transaction line items
+4. **categories** - Product categories ✅ IMPLEMENTED
+   - Fields: `name`, `description`
+   - Used to organize products in POS interface
+
+5. **products** - Product master data ✅ IMPLEMENTED
+   - Fields: `sku`, `barcode`, `name`, `description`, `category_id`, `price`, `cost`, `tax_percentage`, `image`
+   - Shared across all outlets (master data)
+
+6. **product_stocks** - Stock per outlet ✅ IMPLEMENTED
+   - Links: `product_id`, `outlet_id`
+   - Fields: `quantity`, `min_stock_level`
+   - Tracks inventory per outlet separately
+
+7. **promotions** - Promotion/discount master ✅ IMPLEMENTED
+   - Fields: `code`, `name`, `discount_type` (percentage/fixed), `discount_value`, `start_date`, `end_date`, `is_active`
+   - Can be scoped to specific outlets via `outlet_id` (NULL = all outlets)
+
+8. **promotion_items** - Products eligible for promotions ✅ IMPLEMENTED
+   - Links: `promotion_id`, `product_id`
+
+9. **transactions** - Sales transaction headers ✅ IMPLEMENTED
+   - Links: `outlet_id`, `user_id` (cashier)
+   - Fields: `transaction_number`, `subtotal`, `tax`, `discount`, `total`, `payment_method`, `customer_name`, `customer_phone`
+
+10. **transaction_details** - Transaction line items ✅ IMPLEMENTED
+    - Links: `transaction_id`, `product_id`
+    - Fields: `quantity`, `unit_price`, `subtotal`, `discount`, `total`
 
 ## CodeIgniter 4 Specific Patterns
 
@@ -285,18 +304,36 @@ composer test
 
 ## Project-Specific Context
 
-### Current State (feature/admin-template-mazer)
+### Current State (dev branch)
 - ✅ Authentication system with Shield
-- ✅ Login/logout functionality
+- ✅ Login/logout functionality with user active status check
 - ✅ Three user roles: admin, manager, cashier
 - ✅ Mazer admin template integration (CDN-based)
-- ✅ Role-based dashboards (admin-mazer.php uses Mazer template)
-- ✅ Functional POS interface with cart management, responsive design
-- ✅ Outlet management structure
-- ⏳ Product management (upcoming - currently using mock data)
-- ⏳ Backend API for POS transactions (currently frontend-only)
-- ⏳ Promotion system (upcoming)
-- ⏳ Reporting system (upcoming)
+- ✅ Role-based dashboards
+- ✅ **Fully functional POS interface** with real backend integration
+- ✅ **Product & Category Management** - Full CRUD operations
+- ✅ **Stock Management** - Per-outlet inventory tracking
+- ✅ **Promotion System** - Discount management with product assignments
+- ✅ **Transaction System** - Complete checkout flow with database persistence
+- ✅ **Reporting System** - Sales reports for admin and managers
+- ✅ **User Management** - Admin can create/update/deactivate users
+- ✅ **Outlet Management** - Admin controls outlet status (active/inactive)
+
+### Implementation Details
+
+#### Controllers Organization
+- **Admin Controllers** (`app/Controllers/Admin/`):
+  - `OutletController` - Outlet CRUD + DataTables
+  - `UserController` - User CRUD + role assignment + status toggle
+  - `CategoryController` - Category CRUD
+  - `ProductController` - Product CRUD + stock management + image upload
+  - `PromotionController` - Promotion CRUD + product assignments
+- **Manager Controllers** (`app/Controllers/Manager/`):
+  - `OutletController` - View own outlet only
+  - `ProductController` - View products + update stock for assigned outlet
+- **PosController** - Handles checkout transactions (AJAX)
+- **ReportController** - Sales reports with DataTables for admin/manager
+- **DashboardController** - Role-based dashboard views + POS interface
 
 ### Mazer Admin Template Integration
 - **CDN-based**: Mazer CSS/JS loaded from `https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/`
@@ -311,13 +348,28 @@ composer test
 - **Layout**: Three-column design (category sidebar | product grid | invoice cart)
 - **Responsive**: Mobile-friendly with collapsible invoice panel
 - **Frontend Cart Management**: JavaScript-based cart with quantity controls
-- **Product Display**: Grid layout with images from Unsplash (placeholder)
-- **Current Data**: Mock products hardcoded in view (9 sample items)
-- **Payment Methods**: Credit Card, PayPal, Cash (UI only, no backend)
+- **Product Display**: Grid layout with product images from database
+- **Backend Integration**: AJAX POST to `/pos/checkout` for transaction processing
+- **Stock Validation**: Real-time stock checking per outlet during checkout
+- **Payment Methods**: Credit Card, PayPal, Cash (UI + backend support)
 - **Mobile Behavior**: 
   - Cart slides in from right on product add
   - Bottom-right floating cart toggle button
   - Category sidebar hidden on very small screens
+
+### DataTables Integration
+All admin/manager list views use DataTables CDN for server-side pagination:
+- **CDN**: `https://cdn.datatables.net/1.13.6/` (Bootstrap 5 theme)
+- **Pattern**: AJAX endpoint `/datatable` returns JSON for each resource
+- **Features**: Search, sort, pagination, responsive design
+- **Example**: `admin/products/datatable`, `admin/outlets/datatable`
+
+### Seeder System
+Multiple seeders available for development:
+- **InitialDataSeeder**: Creates outlets + users (run first)
+- **ProductDataSeeder**: Creates categories + 20+ food/beverage products with images
+- **PromotionSeeder**: Creates sample promotions with product assignments
+- Run with: `php spark db:seed SeederName`
 
 ### Multi-Outlet Logic
 - Super admin (`outlet_id = NULL`) can access all outlets
@@ -351,6 +403,13 @@ $routes->group('manager', ['filter' => 'group:manager|outletactive'], ...)
 $routes->group('', ['filter' => 'group:admin,manager,cashier|outletactive'], ...)
 ```
 
+#### User Active Status
+Users have `active` field in database:
+- **ActiveUserFilter** (`app/Filters/ActiveUserFilter.php`) forces logout for inactive users
+- Admin can toggle user status via `/admin/users/toggle-status/:id`
+- Applied globally to all authenticated routes
+- Prevents inactive users from accessing any part of the system
+
 ### Common POS Patterns (To Be Implemented)
 When implementing POS features, follow these patterns:
 - **Master data**: Products, categories (shared across outlets)
@@ -366,6 +425,18 @@ When implementing POS features, follow these patterns:
 - Foreign keys: Always define relationships with `ON DELETE` and `ON UPDATE` actions
 - Unique constraints: Use for business keys (outlet code, product SKU, barcode)
 
+### Testing Strategy
+PHPUnit test suite includes:
+- **Feature Tests**: 
+  - `tests/feature/Admin/` - Admin controller integration tests
+  - `tests/feature/Manager/` - Manager controller integration tests
+- **Unit Tests**: 
+  - `tests/unit/Controllers/` - Controller unit tests
+  - `tests/unit/Models/` - Model unit tests
+  - `tests/unit/Filters/` - Filter unit tests
+- **Run Tests**: `composer test` or `./vendor/bin/phpunit`
+- Test database configured separately in `.env` (`CI_ENVIRONMENT=testing`)
+
 ## Important Notes
 - **Never commit `.env`** - use `env` as template
 - **Document root is `public/`** - configure web server accordingly
@@ -375,19 +446,28 @@ When implementing POS features, follow these patterns:
 - Bootstrap 5 and Bootstrap Icons CDN used for UI
 - Mazer admin template loaded via CDN (not bundled locally except `/public/mazer/` assets)
 
-## Next Development Priorities
-1. **Product Management Backend**:
-   - Create `products` and `categories` tables via migrations
-   - Implement CRUD controllers for admin/manager
-   - Replace POS mock data with database queries
+## Future Enhancement Ideas
+1. **Advanced Reporting**:
+   - Export reports to PDF/Excel
+   - Graphical charts for sales trends
+   - Profit margin analysis per product
    
-2. **POS Backend Integration**:
-   - Create `transactions` and `transaction_details` tables
-   - API endpoint for cart submission: `POST /pos/checkout`
-   - Link transactions to `outlet_id` and `user_id`
+2. **Customer Management**:
+   - Customer database with loyalty points
+   - Purchase history tracking
+   - Customer-specific promotions
    
-3. **Inventory Management**:
-   - Create `product_stocks` table with outlet_id relationship
-   - Stock validation on POS checkout
-   - Low stock alerts for managers
+3. **Inventory Alerts**:
+   - Low stock email notifications
+   - Automatic reorder suggestions
+   - Stock movement tracking (transfers between outlets)
+   
+4. **Multi-Language Support**:
+   - CodeIgniter's built-in localization
+   - Language switcher in UI
+   
+5. **Payment Integration**:
+   - Integrate with payment gateways (Stripe, PayPal API)
+   - Split payments support
+   - Electronic receipt via email/SMS
 

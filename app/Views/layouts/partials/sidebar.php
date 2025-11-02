@@ -118,13 +118,7 @@ $currentUrl = current_url();
             
             <li class="sidebar-title">Account</li>
             
-            <li class="sidebar-item">
-                <a href="/profile" class='sidebar-link'>
-                    <i class="bi bi-person-circle"></i>
-                    <span>Profile</span>
-                </a>
-            </li>
-            
+
             <li class="sidebar-item">
                 <a href="/logout" class='sidebar-link'>
                     <i class="bi bi-box-arrow-right"></i>
