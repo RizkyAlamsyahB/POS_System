@@ -8,8 +8,10 @@
     
     <!-- Mazer CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/compiled/css/app.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/compiled/css/app-dark.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/compiled/css/iconly.css">
+    
+    <!-- Theme Color Override - Change Mazer primary color from #435EBE to #3772F0 -->
+    <link rel="stylesheet" href="<?= base_url('assets/css/theme-override.css') ?>">
     
     <!-- Favicon -->
     <link rel="shortcut icon" href="<?= base_url('favicon.ico') ?>" type="image/x-icon">
@@ -18,7 +20,6 @@
 </head>
 
 <body>
-    <script src="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/static/js/initTheme.js"></script>
     <div id="app">
         <!-- Sidebar -->
         <div id="sidebar">
@@ -44,7 +45,6 @@
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     
     <!-- Mazer JS -->
-    <script src="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/static/js/components/dark.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/compiled/js/app.js"></script>
     

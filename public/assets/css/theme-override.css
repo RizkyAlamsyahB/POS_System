@@ -1,0 +1,329 @@
+/**
+ * ============================================================================
+ * MAZER THEME COLOR OVERRIDE
+ * ============================================================================
+ * 
+ * Original Mazer Primary Color: #435EBE
+ * Custom Primary Color: #3772F0
+ * 
+ * This file overrides all Mazer theme colors to use custom brand color
+ * Include this file AFTER Mazer CSS files
+ */
+
+/* CSS Variables Override */
+:root {
+    --bs-primary: #3772F0 !important;
+    --bs-primary-rgb: 55, 114, 240 !important;
+    --bs-primary-hover: #2563eb !important;
+    --bs-primary-active: #1e40af !important;
+}
+
+/* ========== BUTTONS ========== */
+.btn-primary {
+    background-color: #3772F0 !important;
+    border-color: #3772F0 !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+}
+
+.btn-primary:active,
+.btn-primary.active {
+    background-color: #1e40af !important;
+    border-color: #1e40af !important;
+}
+
+.btn-primary:disabled {
+    background-color: #3772F0 !important;
+    border-color: #3772F0 !important;
+    opacity: 0.65;
+}
+
+.btn-outline-primary {
+    color: #3772F0 !important;
+    border-color: #3772F0 !important;
+    background-color: transparent !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: #3772F0 !important;
+    border-color: #3772F0 !important;
+    color: #fff !important;
+}
+
+.btn-outline-primary:active,
+.btn-outline-primary.active {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+    color: #fff !important;
+}
+
+/* ========== TEXT & BACKGROUNDS ========== */
+.text-primary {
+    color: #3772F0 !important;
+}
+
+.bg-primary {
+    background-color: #3772F0 !important;
+}
+
+.bg-light-primary {
+    background-color: rgba(55, 114, 240, 0.1) !important;
+}
+
+.border-primary {
+    border-color: #3772F0 !important;
+}
+
+/* ========== BADGES ========== */
+.badge-primary,
+.badge.bg-primary {
+    background-color: #3772F0 !important;
+    color: #fff !important;
+}
+
+/* ========== LINKS ========== */
+a.text-primary:hover,
+a.text-primary:focus {
+    color: #2563eb !important;
+}
+
+/* ========== SIDEBAR ========== */
+.sidebar-wrapper .sidebar-item.active > a {
+    background-color: #3772F0 !important;
+    color: #fff !important;
+}
+
+.sidebar-wrapper .sidebar-item.active .sidebar-link {
+    background-color: #3772F0 !important;
+}
+
+.sidebar-wrapper .sidebar-link:hover {
+    background-color: rgba(55, 114, 240, 0.1) !important;
+    color: #3772F0 !important;
+}
+
+.sidebar-wrapper .sidebar-link i,
+.sidebar-wrapper .sidebar-link svg {
+    color: inherit !important;
+}
+
+/* ========== FORM CONTROLS ========== */
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+    border-color: #3772F0 !important;
+    box-shadow: 0 0 0 0.25rem rgba(55, 114, 240, 0.25) !important;
+}
+
+.form-check-input:checked {
+    background-color: #3772F0 !important;
+    border-color: #3772F0 !important;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: #3772F0 !important;
+    border-color: #3772F0 !important;
+}
+
+/* ========== ALERTS ========== */
+.alert-primary {
+    background-color: rgba(55, 114, 240, 0.1) !important;
+    border-color: rgba(55, 114, 240, 0.2) !important;
+    color: #2563eb !important;
+}
+
+.alert-primary .alert-heading {
+    color: #1e40af !important;
+}
+
+/* ========== PROGRESS BAR ========== */
+.progress-bar,
+.progress-bar-primary {
+    background-color: #3772F0 !important;
+}
+
+/* ========== PAGINATION ========== */
+.page-link {
+    color: #3772F0 !important;
+}
+
+.page-link:hover {
+    color: #2563eb !important;
+    background-color: rgba(55, 114, 240, 0.1) !important;
+    border-color: #3772F0 !important;
+}
+
+.page-item.active .page-link {
+    background-color: #3772F0 !important;
+    border-color: #3772F0 !important;
+    color: #fff !important;
+}
+
+/* ========== DROPDOWN ========== */
+.dropdown-item.active,
+.dropdown-item:active {
+    background-color: #3772F0 !important;
+    color: #fff !important;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: rgba(55, 114, 240, 0.1) !important;
+    color: #3772F0 !important;
+}
+
+/* ========== NAV TABS & PILLS ========== */
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+    background-color: #3772F0 !important;
+    color: #fff !important;
+}
+
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+    color: #3772F0 !important;
+    border-bottom-color: #3772F0 !important;
+}
+
+.nav-tabs .nav-link:hover,
+.nav-tabs .nav-link:focus {
+    border-color: rgba(55, 114, 240, 0.2) !important;
+    color: #3772F0 !important;
+}
+
+/* ========== LIST GROUP ========== */
+.list-group-item.active {
+    background-color: #3772F0 !important;
+    border-color: #3772F0 !important;
+    color: #fff !important;
+}
+
+.list-group-item-action:hover,
+.list-group-item-action:focus {
+    background-color: rgba(55, 114, 240, 0.1) !important;
+    color: #3772F0 !important;
+}
+
+.list-group-item-primary {
+    background-color: rgba(55, 114, 240, 0.1) !important;
+    color: #2563eb !important;
+}
+
+/* ========== SPINNERS ========== */
+.spinner-border.text-primary,
+.spinner-grow.text-primary {
+    color: #3772F0 !important;
+}
+
+/* ========== TOAST ========== */
+.toast-header.bg-primary {
+    background-color: #3772F0 !important;
+    color: #fff !important;
+}
+
+/* ========== CARD ========== */
+.card-header.bg-primary {
+    background-color: #3772F0 !important;
+    color: #fff !important;
+}
+
+/* ========== TABLE ========== */
+.table-primary {
+    background-color: rgba(55, 114, 240, 0.1) !important;
+    border-color: rgba(55, 114, 240, 0.2) !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* ========== BREADCRUMB ========== */
+.breadcrumb-item.active {
+    color: #3772F0 !important;
+}
+
+.breadcrumb-item a {
+    color: #3772F0 !important;
+}
+
+.breadcrumb-item a:hover {
+    color: #2563eb !important;
+}
+
+/* ========== ACCORDION ========== */
+.accordion-button:not(.collapsed) {
+    background-color: rgba(55, 114, 240, 0.1) !important;
+    color: #3772F0 !important;
+}
+
+.accordion-button:focus {
+    border-color: #3772F0 !important;
+    box-shadow: 0 0 0 0.25rem rgba(55, 114, 240, 0.25) !important;
+}
+
+/* ========== OFFCANVAS ========== */
+.offcanvas-header.bg-primary {
+    background-color: #3772F0 !important;
+    color: #fff !important;
+}
+
+/* ========== MODAL ========== */
+.modal-header.bg-primary {
+    background-color: #3772F0 !important;
+    color: #fff !important;
+}
+
+/* ========== DATATABLE (if used) ========== */
+.dataTable tbody tr.selected {
+    background-color: rgba(55, 114, 240, 0.1) !important;
+}
+
+div.dataTables_wrapper div.dataTables_paginate .paginate_button.current {
+    background-color: #3772F0 !important;
+    border-color: #3772F0 !important;
+    color: #fff !important;
+}
+
+/* ========== PERFECT SCROLLBAR ========== */
+.ps__thumb-y {
+    background-color: #3772F0 !important;
+}
+
+/* ========== ADDITIONAL MAZER COMPONENTS ========== */
+.avatar.bg-light-primary {
+    background-color: rgba(55, 114, 240, 0.1) !important;
+    color: #3772F0 !important;
+}
+
+.stats-icon.bg-primary,
+.stats-icon.purple {
+    background-color: #3772F0 !important;
+}
+
+/* Widget Icons */
+.bi-circle-fill.text-primary,
+.iconly-boldBookmark.text-primary {
+    color: #3772F0 !important;
+}
+
+/* ========== HIDE SCROLLBAR ========== */
+/* Hide scrollbar for Chrome, Safari and Opera */
+*::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* ========== FOCUS VISIBLE ========== */
+*:focus-visible {
+    outline-color: #3772F0 !important;
+}

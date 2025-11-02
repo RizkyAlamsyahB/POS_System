@@ -2,38 +2,133 @@
 
 <?= $this->section('styles') ?>
 <!-- External POS CSS -->
- <style>
-    /* === Custom Blue Theme Override === */
+<style>
+    /* === Mazer Theme Color Override - Change from #435EBE to #3772F0 === */
     :root {
         --bs-primary: #3772F0 !important;
         --bs-primary-rgb: 55, 114, 240 !important;
     }
 
+    /* Buttons */
     .btn-primary {
-        background-color: var(--bs-primary) !important;
-        border-color: var(--bs-primary) !important;
+        background-color: #3772F0 !important;
+        border-color: #3772F0 !important;
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus,
+    .btn-primary:active {
+        background-color: #2563eb !important;
+        border-color: #2563eb !important;
     }
 
     .btn-outline-primary {
-        color: var(--bs-primary) !important;
-        border-color: var(--bs-primary) !important;
+        color: #3772F0 !important;
+        border-color: #3772F0 !important;
     }
 
-    .btn-outline-primary:hover {
-        background-color: var(--bs-primary) !important;
+    .btn-outline-primary:hover,
+    .btn-outline-primary:focus,
+    .btn-outline-primary:active {
+        background-color: #3772F0 !important;
+        border-color: #3772F0 !important;
         color: #fff !important;
     }
 
+    /* Text & Background */
     .text-primary {
-        color: var(--bs-primary) !important;
+        color: #3772F0 !important;
     }
 
     .bg-primary {
-        background-color: var(--bs-primary) !important;
+        background-color: #3772F0 !important;
     }
 
     .border-primary {
-        border-color: var(--bs-primary) !important;
+        border-color: #3772F0 !important;
+    }
+
+    /* Badges */
+    .badge-primary,
+    .badge.bg-primary {
+        background-color: #3772F0 !important;
+    }
+
+    /* Links */
+    a.text-primary:hover,
+    a.text-primary:focus {
+        color: #2563eb !important;
+    }
+
+    /* Sidebar Active Menu */
+    .sidebar-wrapper .sidebar-item.active > a {
+        background-color: #3772F0 !important;
+    }
+
+    .sidebar-wrapper .sidebar-link:hover {
+        background-color: rgba(55, 114, 240, 0.1) !important;
+    }
+
+    /* Form Controls Focus */
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #3772F0 !important;
+        box-shadow: 0 0 0 0.25rem rgba(55, 114, 240, 0.25) !important;
+    }
+
+    .form-check-input:checked {
+        background-color: #3772F0 !important;
+        border-color: #3772F0 !important;
+    }
+
+    /* Alerts */
+    .alert-primary {
+        background-color: rgba(55, 114, 240, 0.1) !important;
+        border-color: #3772F0 !important;
+        color: #2563eb !important;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+        background-color: #3772F0 !important;
+    }
+
+    /* Pagination */
+    .page-link {
+        color: #3772F0 !important;
+    }
+
+    .page-item.active .page-link {
+        background-color: #3772F0 !important;
+        border-color: #3772F0 !important;
+    }
+
+    /* Dropdown */
+    .dropdown-item.active,
+    .dropdown-item:active {
+        background-color: #3772F0 !important;
+    }
+
+    /* Nav Tabs/Pills */
+    .nav-pills .nav-link.active {
+        background-color: #3772F0 !important;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #3772F0 !important;
+        border-bottom-color: #3772F0 !important;
+    }
+
+    /* List Group */
+    .list-group-item.active {
+        background-color: #3772F0 !important;
+        border-color: #3772F0 !important;
+    }
+
+    /* Spinners */
+    .spinner-border.text-primary,
+    .spinner-grow.text-primary {
+        color: #3772F0 !important;
     }
 </style>
 
