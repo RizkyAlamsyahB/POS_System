@@ -8,6 +8,13 @@ class ProductDataSeeder extends Seeder
 {
     public function run()
     {
+        // Pastikan folder upload ada
+        $uploadPath = FCPATH . 'uploads/products';
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+            echo "📁 Created directory: {$uploadPath}\n";
+        }
+
         // ==============================
         // 1️⃣  Insert Categories
         // ==============================
@@ -42,9 +49,9 @@ class ProductDataSeeder extends Seeder
         echo "✅ Inserted restaurant categories successfully.\n";
 
         // ==============================
-        // 2️⃣  Insert Products
+        // 2️⃣  Insert Products dengan Download Gambar
         // ==============================
-        $products = [
+        $productsData = [
             // Makanan
             [
                 'category_id'  => 1,
@@ -57,6 +64,7 @@ class ProductDataSeeder extends Seeder
                 'tax_type'     => 'PPN',
                 'tax_rate'     => 11.00,
                 'tax_included' => 1,
+                'image_url'    => 'https://images.unsplash.com/photo-1680674814945-7945d913319c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
             ],
             [
                 'category_id'  => 1,
@@ -69,6 +77,7 @@ class ProductDataSeeder extends Seeder
                 'tax_type'     => 'PPN',
                 'tax_rate'     => 11.00,
                 'tax_included' => 1,
+                'image_url'    => 'https://images.unsplash.com/photo-1647102398925-e23f6486ca04?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
             ],
             [
                 'category_id'  => 1,
@@ -81,6 +90,7 @@ class ProductDataSeeder extends Seeder
                 'tax_type'     => 'PPN',
                 'tax_rate'     => 11.00,
                 'tax_included' => 1,
+                'image_url'    => 'https://images.unsplash.com/photo-1622973536968-3ead9e780960?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
             ],
 
             // Minuman
@@ -95,6 +105,7 @@ class ProductDataSeeder extends Seeder
                 'tax_type'     => 'PPN',
                 'tax_rate'     => 11.00,
                 'tax_included' => 1,
+                'image_url'    => 'https://plus.unsplash.com/premium_photo-1664970900098-2676029e6a99?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
             ],
             [
                 'category_id'  => 2,
@@ -107,6 +118,7 @@ class ProductDataSeeder extends Seeder
                 'tax_type'     => 'NONE',
                 'tax_rate'     => 0.00,
                 'tax_included' => 0,
+                'image_url'    => 'https://images.unsplash.com/photo-1635217217664-578a7e17218f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074',
             ],
             [
                 'category_id'  => 2,
@@ -119,6 +131,7 @@ class ProductDataSeeder extends Seeder
                 'tax_type'     => 'PPN',
                 'tax_rate'     => 11.00,
                 'tax_included' => 1,
+                'image_url'    => 'https://plus.unsplash.com/premium_photo-1661347868028-55440b53c791?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
             ],
 
             // Dessert
@@ -133,6 +146,7 @@ class ProductDataSeeder extends Seeder
                 'tax_type'     => 'PPN',
                 'tax_rate'     => 11.00,
                 'tax_included' => 1,
+                'image_url'    => 'https://images.unsplash.com/photo-1668507740203-0654d38b6201?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
             ],
             [
                 'category_id'  => 3,
@@ -145,6 +159,7 @@ class ProductDataSeeder extends Seeder
                 'tax_type'     => 'PPN',
                 'tax_rate'     => 11.00,
                 'tax_included' => 1,
+                'image_url'    => 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
             ],
 
             // Tambahan
@@ -159,6 +174,7 @@ class ProductDataSeeder extends Seeder
                 'tax_type'     => 'NONE',
                 'tax_rate'     => 0.00,
                 'tax_included' => 0,
+                'image_url'    => 'https://plus.unsplash.com/premium_photo-1683133428030-ed210d7498ba?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1125',
             ],
             [
                 'category_id'  => 4,
@@ -171,40 +187,82 @@ class ProductDataSeeder extends Seeder
                 'tax_type'     => 'NONE',
                 'tax_rate'     => 0.00,
                 'tax_included' => 0,
+                'image_url'    => 'https://images.unsplash.com/photo-1627935722051-395636b0d8a5?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1173',
             ],
         ];
 
-        // Tambahkan timestamp otomatis
-        foreach ($products as &$p) {
-            $p['created_at'] = date('Y-m-d H:i:s');
-            $p['updated_at'] = date('Y-m-d H:i:s');
-            $p['image'] = null;
+        // Download gambar dan simpan produk
+        $products = [];
+        foreach ($productsData as $index => $productData) {
+            $imagePath = null;
+            
+            if (isset($productData['image_url']) && !empty($productData['image_url'])) {
+                echo "📥 Downloading image for: {$productData['name']}... ";
+                
+                try {
+                    // Download gambar
+                    $imageContent = @file_get_contents($productData['image_url']);
+                    
+                    if ($imageContent !== false) {
+                        // Generate nama file unik
+                        $extension = 'jpg'; // Default untuk Unsplash
+                        $filename = $productData['sku'] . '_' . time() . '_' . rand(1000, 9999) . '.' . $extension;
+                        $fullPath = $uploadPath . '/' . $filename;
+                        
+                        // Simpan file
+                        if (file_put_contents($fullPath, $imageContent)) {
+                            $imagePath = 'uploads/products/' . $filename;
+                            echo "✅ Success!\n";
+                        } else {
+                            echo "❌ Failed to save file\n";
+                        }
+                    } else {
+                        echo "❌ Failed to download\n";
+                    }
+                } catch (\Exception $e) {
+                    echo "❌ Error: " . $e->getMessage() . "\n";
+                }
+            }
+            
+            // Hapus image_url dari data dan tambahkan ke array products
+            unset($productData['image_url']);
+            $productData['image'] = $imagePath;
+            $productData['created_at'] = date('Y-m-d H:i:s');
+            $productData['updated_at'] = date('Y-m-d H:i:s');
+            
+            $products[] = $productData;
         }
 
+        // Insert batch semua produk
         $this->db->table('products')->insertBatch($products);
-        echo "✅ Inserted 10 restaurant products successfully.\n";
+        echo "✅ Inserted " . count($products) . " restaurant products successfully.\n";
 
         // ==============================
         // 3️⃣  Insert Initial Stock for All Outlets
         // ==============================
         $outlets = $this->db->table('outlets')->get()->getResultArray();
-        $productIds = range(1, count($products));
-
-        $stocks = [];
-        foreach ($outlets as $outlet) {
-            foreach ($productIds as $productId) {
-                $stocks[] = [
-                    'product_id' => $productId,
-                    'outlet_id'  => $outlet['id'],
-                    'stock'      => rand(10, 50),
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ];
+        
+        if (empty($outlets)) {
+            echo "⚠️  No outlets found. Skipping stock insertion.\n";
+        } else {
+            $productIds = range(1, count($products));
+            $stocks = [];
+            
+            foreach ($outlets as $outlet) {
+                foreach ($productIds as $productId) {
+                    $stocks[] = [
+                        'product_id' => $productId,
+                        'outlet_id'  => $outlet['id'],
+                        'stock'      => rand(10, 50),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ];
+                }
             }
+
+            $this->db->table('product_stocks')->insertBatch($stocks);
+            echo "✅ Initial stock for " . count($outlets) . " outlet(s) inserted successfully.\n";
         }
 
-        $this->db->table('product_stocks')->insertBatch($stocks);
-        echo "✅ Initial stock for outlets inserted successfully.\n";
-
-        echo "🎉 Restaurant product seeding completed!\n";
+        echo "\n🎉 Restaurant product seeding with images completed!\n";
     }
 }

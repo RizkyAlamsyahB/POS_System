@@ -152,6 +152,13 @@ $currentUrl = current_url();
                 </a>
             </li>
             
+            <li class="sidebar-item <?= str_contains($currentUrl, '/transactions') ? 'active' : '' ?>">
+                <a href="/transactions" class='sidebar-link'>
+                    <i class="bi bi-receipt"></i>
+                    <span>Riwayat Transaksi</span>
+                </a>
+            </li>
+            
             <li class="sidebar-item <?= str_contains($currentUrl, 'manager/reports') ? 'active' : '' ?>">
                 <a href="/manager/reports" class='sidebar-link'>
                     <i class="bi bi-bar-chart-fill"></i>
@@ -162,16 +169,9 @@ $currentUrl = current_url();
             <?php else: ?>
             <!-- Cashier Menu -->
             <li class="sidebar-item <?= str_contains($currentUrl, '/pos') ? 'active' : '' ?>">
-                <a href="/pos" class='sidebar-link'>
+                <a href="<?= base_url('pos') ?>" class='sidebar-link'>
                     <i class="bi bi-cart-fill"></i>
                     <span>Point of Sale</span>
-                </a>
-            </li>
-            
-            <li class="sidebar-item">
-                <a href="/pos/transactions" class='sidebar-link'>
-                    <i class="bi bi-receipt"></i>
-                    <span>Transactions History</span>
                 </a>
             </li>
             <?php endif; ?>

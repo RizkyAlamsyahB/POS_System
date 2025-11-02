@@ -112,16 +112,20 @@ class PromotionModel extends Model
      */
     public function getPromotionWithItems($id)
     {
-        $promotion = $this->select('promotions.*, outlets.name as outlet_name')
-                          ->join('outlets', 'outlets.id = promotions.outlet_id', 'left')
-                          ->find($id);
+        $db = \Config\Database::connect();
+        
+        $promotion = $db->table('promotions')
+                       ->select('promotions.*, outlets.name as outlet_name')
+                       ->join('outlets', 'outlets.id = promotions.outlet_id', 'left')
+                       ->where('promotions.id', $id)
+                       ->get()
+                       ->getRowArray();
 
         if (!$promotion) {
             return null;
         }
 
         // Get promotion items
-        $db = \Config\Database::connect();
         $promotion['items'] = $db->table('promotion_items')
                                 ->select('promotion_items.*, products.name as product_name, products.sku, products.price')
                                 ->join('products', 'products.id = promotion_items.product_id')

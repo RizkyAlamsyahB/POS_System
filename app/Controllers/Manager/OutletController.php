@@ -52,7 +52,6 @@ class OutletController extends BaseController
             ->join('products', 'products.id = product_stocks.product_id')
             ->where('product_stocks.outlet_id', $outletId)
             ->where('product_stocks.stock <=', 10)
-            ->where('products.is_active', 1)
             ->get()
             ->getResultArray();
 
