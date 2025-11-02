@@ -228,6 +228,9 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<!-- Pusher JS Library - LOAD FIRST -->
+<script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+
 <script>
     function formatRupiah(number) {
         return new Intl.NumberFormat('id-ID').format(number);
@@ -411,5 +414,180 @@
             });
         }
     });
+
+    // ========== PUSHER REAL-TIME TRANSACTION UPDATES ==========
+    (function() {
+        <?php if (ENVIRONMENT === 'development'): ?>
+        Pusher.logToConsole = true;
+        <?php endif; ?>
+
+        // Initialize Pusher
+        const pusher = new Pusher('<?= env('pusher.appKey', '16c9b2af70ac324000d9') ?>', {
+            cluster: '<?= env('pusher.appCluster', 'ap1') ?>',
+            encrypted: true
+        });
+
+        // Manager subscribes to outlet-specific transactions channel
+        const outletId = <?= $outlet['id'] ?? 0 ?>;
+        const channel = pusher.subscribe(`transactions-${outletId}`);
+
+        // Listen for new transaction event
+        channel.bind('transaction-created', function(data) {
+            console.log('New transaction received for outlet:', data);
+            
+            // Update dashboard stats
+            updateDashboardStats(data);
+            
+            // Add transaction to recent transactions table
+            addTransactionToTable(data);
+            
+            // Show notification
+            showTransactionNotification(data);
+        });
+
+        /**
+         * Update dashboard statistics
+         */
+        function updateDashboardStats(data) {
+            // Update total penjualan hari ini
+            const totalSalesEl = document.querySelector('.stats-icon.purple');
+            if (totalSalesEl) {
+                const amountEl = totalSalesEl.closest('.col-6').querySelector('h3');
+                if (amountEl) {
+                    const currentAmount = parseFloat(amountEl.textContent.replace(/[^0-9]/g, '')) || 0;
+                    const newAmount = currentAmount + data.total;
+                    amountEl.textContent = 'Rp ' + formatNumber(newAmount);
+                }
+            }
+
+            // Update jumlah transaksi
+            const countEl = document.querySelector('.col-6:nth-child(2) h3');
+            if (countEl) {
+                const currentCount = parseInt(countEl.textContent) || 0;
+                countEl.textContent = currentCount + 1;
+            }
+        }
+
+        /**
+         * Add new transaction to the table
+         */
+        function addTransactionToTable(data) {
+            const tbody = document.querySelector('.table-hover tbody');
+            if (!tbody) return;
+
+            // Remove "Belum ada transaksi" message if exists
+            const emptyRow = tbody.querySelector('td[colspan="5"]');
+            if (emptyRow) {
+                emptyRow.closest('tr').remove();
+            }
+
+            // Format date
+            const date = new Date(data.timestamp);
+            const formattedDate = date.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).replace(',', '');
+
+            // Create new row
+            const newRow = document.createElement('tr');
+            newRow.className = 'clickable-row new-transaction-highlight';
+            newRow.style.cursor = 'pointer';
+            newRow.onclick = function() { viewTransactionDetail(data.transaction_id); };
+            newRow.innerHTML = `
+                <td><code>${escapeHtml(data.transaction_number)}</code></td>
+                <td>${escapeHtml(data.cashier_name)}</td>
+                <td>${escapeHtml(data.customer_name) || '-'}</td>
+                <td class="text-end"><strong>Rp ${formatNumber(data.total)}</strong></td>
+                <td><small>${formattedDate}</small></td>
+            `;
+
+            // Prepend to table (newest first)
+            tbody.insertBefore(newRow, tbody.firstChild);
+
+            // Add highlight animation
+            setTimeout(() => {
+                newRow.classList.remove('new-transaction-highlight');
+            }, 3000);
+
+            // Limit table to 10 rows
+            const rows = tbody.querySelectorAll('tr');
+            if (rows.length > 10) {
+                rows[rows.length - 1].remove();
+            }
+        }
+
+        /**
+         * Show toast notification for new transaction
+         */
+        function showTransactionNotification(data) {
+            const toastHtml = `
+                <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" style="position: fixed; top: 80px; right: 20px; z-index: 9999;">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <strong>🎉 Transaksi Baru!</strong><br>
+                            ${data.transaction_number}<br>
+                            Total: <strong>Rp ${formatNumber(data.total)}</strong><br>
+                            <small>Kasir: ${escapeHtml(data.cashier_name)}</small>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+            
+            const toastContainer = document.createElement('div');
+            toastContainer.innerHTML = toastHtml;
+            document.body.appendChild(toastContainer);
+            
+            const toastElement = toastContainer.querySelector('.toast');
+            const toast = new bootstrap.Toast(toastElement, {
+                autohide: true,
+                delay: 5000
+            });
+            toast.show();
+            
+            toastElement.addEventListener('hidden.bs.toast', function() {
+                toastContainer.remove();
+            });
+        }
+
+        /**
+         * Helper: Format number with thousands separator
+         */
+        function formatNumber(num) {
+            return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        /**
+         * Helper: Escape HTML to prevent XSS
+         */
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        console.log(`Pusher initialized for manager dashboard - listening on channel: transactions-${outletId}`);
+    })();
 </script>
+
+<!-- CSS for new transaction highlight animation -->
+<style>
+    @keyframes highlightTransaction {
+        0% {
+            background-color: #d4edda;
+        }
+        100% {
+            background-color: transparent;
+        }
+    }
+
+    .new-transaction-highlight {
+        animation: highlightTransaction 3s ease-in-out;
+    }
+</style>
+
 <?= $this->endSection() ?>
