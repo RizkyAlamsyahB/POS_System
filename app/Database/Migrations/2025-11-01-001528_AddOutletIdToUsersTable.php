@@ -27,8 +27,23 @@ class AddOutletIdToUsersTable extends Migration
 
     public function down()
     {
-        // Drop foreign key first
-        $this->forge->dropForeignKey('users', 'fk_users_outlet_id');
-        $this->forge->dropColumn('users', 'outlet_id');
+        // Check if foreign key exists before dropping
+        $db = \Config\Database::connect();
+        $foreignKeys = $db->query("
+            SELECT CONSTRAINT_NAME 
+            FROM information_schema.TABLE_CONSTRAINTS 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = 'users' 
+            AND CONSTRAINT_NAME = 'fk_users_outlet_id'
+        ")->getResult();
+
+        if (!empty($foreignKeys)) {
+            $this->forge->dropForeignKey('users', 'fk_users_outlet_id');
+        }
+
+        // Drop column if exists
+        if ($db->fieldExists('outlet_id', 'users')) {
+            $this->forge->dropColumn('users', 'outlet_id');
+        }
     }
 }
