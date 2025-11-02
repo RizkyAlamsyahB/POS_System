@@ -417,10 +417,6 @@
 
     // ========== PUSHER REAL-TIME TRANSACTION UPDATES ==========
     (function() {
-        <?php if (ENVIRONMENT === 'development'): ?>
-        Pusher.logToConsole = true;
-        <?php endif; ?>
-
         // Initialize Pusher
         const pusher = new Pusher('<?= env('pusher.appKey', '16c9b2af70ac324000d9') ?>', {
             cluster: '<?= env('pusher.appCluster', 'ap1') ?>',
@@ -433,8 +429,6 @@
 
         // Listen for new transaction event
         channel.bind('transaction-created', function(data) {
-            console.log('New transaction received for outlet:', data);
-            
             // Update dashboard stats
             updateDashboardStats(data);
             
@@ -569,8 +563,6 @@
             div.textContent = text;
             return div.innerHTML;
         }
-
-        console.log(`Pusher initialized for manager dashboard - listening on channel: transactions-${outletId}`);
     })();
 </script>
 
