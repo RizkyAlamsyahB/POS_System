@@ -95,4 +95,14 @@ $routes->group('', ['filter' => 'group:admin,manager,cashier'], function($routes
 });
 $routes->group('pos', ['filter' => 'group:cashier,manager,admin'], function($routes) {
     $routes->get('/', 'DashboardController::pos');
+    
+    // Transaction/Checkout
+    $routes->post('checkout', 'PosController::checkout');
+});
+
+// Transaction history routes (Manager and Admin only - cashiers cannot access)
+$routes->group('transactions', ['filter' => 'group:manager,admin'], function($routes) {
+    $routes->get('/', 'Cashier\TransactionController::history');
+    $routes->get('datatable', 'Cashier\TransactionController::datatable');
+    $routes->get('view/(:num)', 'Cashier\TransactionController::view/$1');
 });

@@ -103,7 +103,6 @@ class ProductStockModel extends Model
             ->join('products', 'products.id = product_stocks.product_id')
             ->where('outlet_id', $outletId)
             ->where('stock <=', $threshold)
-            ->where('products.is_active', 1)
             ->findAll();
     }
 }
