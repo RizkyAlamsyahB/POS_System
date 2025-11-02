@@ -7,7 +7,7 @@ $currentUrl = current_url();
     <div class="sidebar-header position-relative">
         <div class="d-flex justify-content-between align-items-center">
             <div class="logo">
-                <a href="<?= base_url() ?>"><i class="bi bi-shop"></i> POS System</a>
+                <a href="<?= base_url() ?>">Point Of Sale</a>
             </div>
             <div class="sidebar-toggler x">
                 <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
@@ -96,8 +96,7 @@ $currentUrl = current_url();
             
             <li class="sidebar-item <?= str_contains($currentUrl, '/pos') ? 'active' : '' ?>">
                 <a href="/pos" class='sidebar-link'>
-                    <i class="bi bi-cart-fill"></i>
-                    <span>POS</span>
+                    <span>Point Of Sale</span>
                 </a>
             </li>
             
@@ -112,8 +111,7 @@ $currentUrl = current_url();
             <!-- Cashier Menu -->
             <li class="sidebar-item <?= str_contains($currentUrl, '/pos') ? 'active' : '' ?>">
                 <a href="<?= base_url('pos') ?>" class='sidebar-link'>
-                    <i class="bi bi-cart-fill"></i>
-                    <span>Point of Sale</span>
+                    <span>Point Of Sale</span>
                 </a>
             </li>
             <?php endif; ?>

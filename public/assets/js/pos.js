@@ -879,88 +879,114 @@ function generateReceipt(transactionData, orderData) {
     };
     
     let receiptHTML = `
-        <div class="receipt-header">
-            <div class="receipt-title">${outletData.name || 'OUTLET'}</div>
-            <div class="receipt-info">${outletData.address || ''}</div>
-            <div class="receipt-info">Tel: ${outletData.phone || ''}</div>
-        </div>
-        
-        <div class="receipt-divider"></div>
-        
-        <div class="receipt-info">
-            <div class="receipt-row">
-                <span>No:</span>
-                <span>${transactionData.transaction_code}</span>
+        <div style="max-width: 300px; margin: 0 auto; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.5;">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 10px;">
+                <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">${outletData.name || 'OUTLET'}</div>
+                <div style="font-size: 11px;">${outletData.address || ''}</div>
+                <div style="font-size: 11px;">Tel: ${outletData.phone || ''}</div>
             </div>
-            <div class="receipt-row">
-                <span>Date:</span>
-                <span>${dateStr} ${timeStr}</span>
-            </div>
-            <div class="receipt-row">
-                <span>Type:</span>
-                <span>${orderTypeLabels[orderData.order_type] || 'Order'}</span>
-            </div>
+            
+            <!-- Transaction Info -->
+            <table style="width: 100%; margin-bottom: 10px; font-size: 11px;">
+                <tr>
+                    <td style="width: 40%;">No</td>
+                    <td style="width: 5%;">:</td>
+                    <td style="text-align: right;">${transactionData.transaction_code}</td>
+                </tr>
+                <tr>
+                    <td>Tanggal</td>
+                    <td>:</td>
+                    <td style="text-align: right;">${dateStr} ${timeStr}</td>
+                </tr>
+                <tr>
+                    <td>Tipe</td>
+                    <td>:</td>
+                    <td style="text-align: right;">${orderTypeLabels[orderData.order_type] || 'Order'}</td>
+                </tr>
     `;
     
     if (orderData.table_number) {
-        receiptHTML += `<div class="receipt-row"><span>Table:</span><span>${orderData.table_number}</span></div>`;
+        receiptHTML += `
+                <tr>
+                    <td>Meja</td>
+                    <td>:</td>
+                    <td style="text-align: right;">${orderData.table_number}</td>
+                </tr>`;
     }
     
     if (orderData.customer_name) {
-        receiptHTML += `<div class="receipt-row"><span>Customer:</span><span>${orderData.customer_name}</span></div>`;
+        receiptHTML += `
+                <tr>
+                    <td>Customer</td>
+                    <td>:</td>
+                    <td style="text-align: right;">${orderData.customer_name}</td>
+                </tr>`;
     }
     
     receiptHTML += `
-            <div class="receipt-row">
-                <span>Cashier:</span>
-                <span>${currentUser.username || 'System'}</span>
-            </div>
-        </div>
-        
-        <div class="receipt-divider"></div>
-        
-        <div class="receipt-items">
+                <tr>
+                    <td>Kasir</td>
+                    <td>:</td>
+                    <td style="text-align: right;">${currentUser.username || 'System'}</td>
+                </tr>
+            </table>
+            
+            <!-- Separator -->
+            <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+            
+            <!-- Items -->
+            <div style="margin-bottom: 10px;">
     `;
     
     // Add cart items
     cart.forEach(item => {
         const itemTotal = item.price * item.qty;
         receiptHTML += `
-            <div class="receipt-item">
-                <div style="font-weight: bold;">${item.name}</div>
-                <div class="receipt-row">
-                    <span>${item.qty} x ${formatCurrency(item.price)}</span>
-                    <span>${formatCurrency(itemTotal)}</span>
+                <div style="margin-bottom: 8px;">
+                    <div style="font-weight: bold; margin-bottom: 2px;">${item.name}</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                        <span>${item.qty} x ${formatCurrency(item.price)}</span>
+                        <span style="font-weight: bold;">${formatCurrency(itemTotal)}</span>
+                    </div>
                 </div>
-            </div>
         `;
     });
     
     receiptHTML += `
-        </div>
-        
-        <div class="receipt-divider"></div>
-        
-        <div class="receipt-row">
-            <span>Subtotal:</span>
-            <span>${formatCurrency(transactionData.grand_total)}</span>
-        </div>
-        <div class="receipt-row receipt-total">
-            <span>TOTAL:</span>
-            <span>${formatCurrency(transactionData.grand_total)}</span>
-        </div>
-        <div class="receipt-row">
-            <span>Paid:</span>
-            <span>${formatCurrency(transactionData.cash_amount)}</span>
-        </div>
-        <div class="receipt-row">
-            <span>Change:</span>
-            <span>${formatCurrency(transactionData.change_amount)}</span>
-        </div>
-        
-        <div class="receipt-footer">
-            Thank You!<br>
-            Please Come Again
+            </div>
+            
+            <!-- Separator -->
+            <div style="border-top: 1px dashed #000; margin: 10px 0;"></div>
+            
+            <!-- Summary -->
+            <table style="width: 100%; font-size: 11px;">
+                <tr>
+                    <td>Subtotal</td>
+                    <td style="text-align: right;">${formatCurrency(transactionData.grand_total)}</td>
+                </tr>
+                <tr style="font-weight: bold; font-size: 13px;">
+                    <td style="padding-top: 5px;">TOTAL</td>
+                    <td style="text-align: right; padding-top: 5px;">${formatCurrency(transactionData.grand_total)}</td>
+                </tr>
+                <tr>
+                    <td style="padding-top: 5px;">Bayar</td>
+                    <td style="text-align: right; padding-top: 5px;">${formatCurrency(transactionData.cash_amount)}</td>
+                </tr>
+                <tr>
+                    <td>Kembali</td>
+                    <td style="text-align: right;">${formatCurrency(transactionData.change_amount)}</td>
+                </tr>
+            </table>
+            
+            <!-- Separator -->
+            <div style="border-top: 2px solid #000; margin: 15px 0 10px 0;"></div>
+            
+            <!-- Footer -->
+            <div style="text-align: center; font-size: 11px; margin-top: 10px;">
+                <div style="font-weight: bold; margin-bottom: 3px;">Terima Kasih!</div>
+                <div>Silakan Datang Kembali</div>
+            </div>
         </div>
     `;
     
@@ -973,5 +999,86 @@ function generateReceipt(transactionData, orderData) {
 
 // Print receipt function
 function printReceipt() {
-    window.print();
+    // Get the receipt content
+    const receiptContent = document.getElementById('receiptContent').innerHTML;
+    
+    // Create a new window for printing
+    const printWindow = window.open('', '', 'height=800,width=600');
+    
+    // Write the receipt HTML to the new window
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Struk Belanja</title>
+            <style>
+                @page {
+                    size: 80mm auto;
+                    margin: 5mm;
+                }
+                
+                @media print {
+                    body {
+                        margin: 0;
+                        padding: 0;
+                    }
+                }
+                
+                body {
+                    font-family: 'Courier New', monospace;
+                    margin: 0;
+                    padding: 15px;
+                    background: white;
+                    font-size: 12px;
+                    line-height: 1.5;
+                }
+                
+                /* Receipt styling */
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                
+                td {
+                    padding: 2px 0;
+                }
+                
+                /* Add shadow effect for PDF preview */
+                @media screen {
+                    body {
+                        background: #f0f0f0;
+                        display: flex;
+                        justify-content: center;
+                        align-items: flex-start;
+                        min-height: 100vh;
+                        padding: 20px;
+                    }
+                    
+                    body > div {
+                        background: white;
+                        padding: 20px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        border-radius: 5px;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            ${receiptContent}
+        </body>
+        </html>
+    `);
+    
+    // Close the document
+    printWindow.document.close();
+    
+    // Auto trigger print dialog after content loads
+    printWindow.onload = function() {
+        printWindow.focus();
+        printWindow.print();
+        // Auto close after print dialog is dismissed
+        printWindow.onafterprint = function() {
+            printWindow.close();
+        };
+    };
 }

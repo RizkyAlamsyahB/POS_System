@@ -163,7 +163,7 @@ class UserController extends BaseController
     {
         $data = [
             'title' => 'Tambah User',
-            'outlets' => $this->outletModel->where('is_active', 1)->findAll(),
+            'outlets' => $this->outletModel->asObject()->where('is_active', 1)->findAll(),
             'roles' => ['manager', 'cashier'], // Only manager and cashier can be created
         ];
 
@@ -242,7 +242,7 @@ class UserController extends BaseController
         $data = [
             'title' => 'Edit User',
             'user' => $user,
-            'outlets' => $this->outletModel->where('is_active', 1)->findAll(),
+            'outlets' => $this->outletModel->asObject()->where('is_active', 1)->findAll(),
             'roles' => $availableRoles,
             'currentRole' => $currentRole,
         ];
@@ -341,7 +341,8 @@ class UserController extends BaseController
             return redirect()->to('/admin/users')->with('error', 'Tidak dapat menghapus user yang sedang login');
         }
 
-        $this->userModel->delete($id);
+        // Force hard delete
+        $this->userModel->delete($id, true);
 
         return redirect()->to('/admin/users')->with('message', 'User berhasil dihapus');
     }

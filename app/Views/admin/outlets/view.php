@@ -70,10 +70,10 @@
 
                 <div class="d-flex gap-2 mt-3">
                     <a href="/admin/outlets/edit/<?= $outlet->id ?>" class="btn btn-warning">
-                        <i class="bi bi-pencil"></i> Edit
+                        Edit
                     </a>
                     <a href="/admin/outlets" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Kembali
+                        Kembali
                     </a>
                 </div>
             </div>
@@ -89,16 +89,10 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-6">
-                                <div class="stats-icon blue mb-2">
-                                    <i class="bi bi-box-seam"></i>
-                                </div>
                                 <h6 class="text-muted font-semibold">Total Produk</h6>
                                 <h6 class="font-extrabold mb-0"><?= $stockSummary['total_products'] ?? 0 ?></h6>
                             </div>
                             <div class="col-6">
-                                <div class="stats-icon green mb-2">
-                                    <i class="bi bi-inbox-fill"></i>
-                                </div>
                                 <h6 class="text-muted font-semibold">Total Stok</h6>
                                 <h6 class="font-extrabold mb-0"><?= number_format($stockSummary['total_stock'] ?? 0) ?></h6>
                             </div>
@@ -113,9 +107,6 @@
                         <h5 class="card-title mb-0">Pengguna</h5>
                     </div>
                     <div class="card-body">
-                        <div class="stats-icon purple mb-2">
-                            <i class="bi bi-people-fill"></i>
-                        </div>
                         <h6 class="text-muted font-semibold">Total Pengguna</h6>
                         <h6 class="font-extrabold mb-0"><?= count($users) ?> orang</h6>
                     </div>

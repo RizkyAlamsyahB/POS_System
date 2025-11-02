@@ -61,7 +61,7 @@
     }
 
     /* Sidebar Active Menu */
-    .sidebar-wrapper .sidebar-item.active > a {
+    .sidebar-wrapper .sidebar-item.active>a {
         background-color: #3772F0 !important;
     }
 
@@ -139,14 +139,14 @@
 <!-- Top Header -->
 <div class="pos-top-header">
     <div class="user-profile">
-        <img src="https://ui-avatars.com/api/?name=<?= urlencode(auth()->user()->username ?? 'User') ?>&background=3772F0&color=fff" 
-             alt="User" class="user-avatar">
+        <img src="https://ui-avatars.com/api/?name=<?= urlencode(auth()->user()->username ?? 'User') ?>&background=3772F0&color=fff"
+            alt="User" class="user-avatar">
         <div class="user-info">
             <h5><?= esc(auth()->user()->username ?? 'Cashier') ?></h5>
             <p><?= esc($outlet['name'] ?? 'Outlet') ?></p>
         </div>
     </div>
-    
+
     <a href="<?= url_to('logout') ?>" class="btn-logout">
         <i class="bi bi-box-arrow-right"></i>
         <span>Logout</span>
@@ -165,13 +165,13 @@
                 <span>All Menu</span>
                 <span class="badge"><?= count($products) ?></span>
             </div>
-            
+
             <!-- Dynamic Category Tabs -->
             <?php if (!empty($categories)): ?>
                 <?php foreach ($categories as $category): ?>
-                    <div class="category-tab" 
-                         data-category="<?= esc(strtolower(str_replace(' ', '-', $category['name']))) ?>"
-                         data-category-id="<?= $category['id'] ?>">
+                    <div class="category-tab"
+                        data-category="<?= esc(strtolower(str_replace(' ', '-', $category['name']))) ?>"
+                        data-category-id="<?= $category['id'] ?>">
                         <i class="<?= $category['icon'] ?>"></i>
                         <span><?= esc($category['name']) ?></span>
                         <span class="badge"><?= $category['product_count'] ?></span>
@@ -179,7 +179,7 @@
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
-        
+
         <!-- Menu Grid -->
         <div class="menu-grid-wrapper">
             <div class="menu-grid" id="menuGrid">
@@ -190,9 +190,9 @@
                     </div>
                 <?php else: ?>
                     <?php foreach ($products as $product): ?>
-                        <?php 
+                        <?php
                         $stock = (int)$product['stock'];
-                        
+
                         // Handle image path - check if it already contains 'uploads/'
                         $imagePath = '';
                         if (!empty($product["image"])) {
@@ -206,7 +206,7 @@
                         } else {
                             $imagePath = 'https://via.placeholder.com/400x300/667eea/ffffff?text=' . urlencode(substr($product["name"], 0, 1));
                         }
-                        
+
                         $productData = [
                             "id" => $product["id"],
                             "name" => $product["name"],
@@ -219,7 +219,7 @@
                             "stock" => $stock,
                             "image" => $imagePath
                         ];
-                        
+
                         // Check if product has active promotion
                         $hasPromo = false;
                         $promoLabel = '';
@@ -237,28 +237,28 @@
                             }
                         }
                         ?>
-                        <div class="menu-card" 
-                             data-product='<?= json_encode($productData) ?>'
-                             data-category-id="<?= $product['category_id'] ?>">
+                        <div class="menu-card"
+                            data-product='<?= json_encode($productData) ?>'
+                            data-category-id="<?= $product['category_id'] ?>">
                             <div class="menu-card-image">
                                 <?php if ($hasPromo): ?>
-                                    <span class="promo-badge" 
-                                          style="cursor: pointer;" 
-                                          onclick="showPromoDetails(<?= htmlspecialchars(json_encode($promoData)) ?>)"
-                                          title="Click to see promotion details">
+                                    <span class="promo-badge"
+                                        style="cursor: pointer;"
+                                        onclick="showPromoDetails(<?= htmlspecialchars(json_encode($promoData)) ?>)"
+                                        title="Click to see promotion details">
                                         <i class="bi bi-tag-fill"></i> <?= $promoLabel ?> <i class="bi bi-info-circle-fill ms-1" style="font-size: 0.7rem; opacity: 0.9;"></i>
                                     </span>
                                 <?php endif; ?>
-                                <img src="<?= $productData['image'] ?>" 
-                                     alt="<?= esc($product['name']) ?>" 
-                                     style="width: 100%; height: 100%; object-fit: cover;">
+                                <img src="<?= $productData['image'] ?>"
+                                    alt="<?= esc($product['name']) ?>"
+                                    style="width: 100%; height: 100%; object-fit: cover;">
                             </div>
                             <div class="menu-card-body">
                                 <div class="menu-card-name"><?= esc($product['name']) ?></div>
                                 <div class="menu-card-desc">
                                     <?= esc(!empty($product['description']) ? $product['description'] : $product['category_name'] ?? 'Produk berkualitas') ?>
                                 </div>
-                                
+
                                 <!-- Stock Badge -->
                                 <div style="margin-bottom: 0.5rem;">
                                     <?php if ($stock > 10): ?>
@@ -275,7 +275,7 @@
                                         </span>
                                     <?php endif; ?>
                                 </div>
-                                
+
                                 <div class="menu-card-footer">
                                     <div class="menu-price">
                                         Rp <?= number_format($product['price'], 0, ',', '.') ?>
@@ -293,27 +293,27 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Invoice Panel -->
     <div class="invoice-panel" id="invoicePanel">
         <button class="invoice-close-btn" onclick="toggleInvoice()">
             <i class="bi bi-x-lg"></i>
         </button>
-        
+
         <div class="invoice-header">
             <h3>Keranjang</h3>
         </div>
-        
+
         <div class="invoice-items" id="invoiceItems">
             <div class="invoice-empty">
                 <i class="bi bi-receipt"></i>
                 <p>Belum ada item</p>
             </div>
         </div>
-        
+
         <div class="payment-summary">
             <h4>Ringkasan Pembayaran</h4>
-            
+
             <div class="summary-row subtotal">
                 <span>Sub Total</span>
                 <span id="subTotal">Rp 0</span>
@@ -322,28 +322,28 @@
                 <span>Diskon <i class="bi bi-tag-fill" style="font-size: 0.75rem; color: #28a745;"></i></span>
                 <span id="discountAmount" style="color: #28a745; font-weight: 600;">Rp 0</span>
             </div>
-            
+
             <!-- Tax yang ditambahkan (dari produk tax_included = false) -->
             <div class="summary-row tax" id="taxAddedRow" style="display: none;">
                 <span>Pajak (PPN) <i class="bi bi-receipt" style="font-size: 0.75rem; opacity: 0.6;"></i></span>
                 <span id="taxAmount">Rp 0</span>
             </div>
-            
+
             <!-- Info: Tax yang sudah termasuk (dari produk tax_included = true) -->
             <div class="summary-row tax-info" id="taxIncludedRow" style="display: none; font-size: 0.875rem; opacity: 0.8;">
                 <span>
-                    <i class="bi bi-info-circle" style="font-size: 0.75rem;"></i> 
+                    <i class="bi bi-info-circle" style="font-size: 0.75rem;"></i>
                     PPN termasuk
                 </span>
                 <span id="taxIncludedAmount" style="font-style: italic;">Rp 0</span>
             </div>
-            
+
             <hr style="border-top: 2px solid #e9ecef; margin: 0.75rem 0;">
             <div class="summary-row total">
                 <span>Total Pembayaran</span>
                 <span class="amount" id="totalPayment">Rp 0</span>
             </div>
-            
+
             <!-- Order Type Selection -->
             <div style="margin: 1rem 0;">
                 <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #495057; margin-bottom: 0.5rem;">
@@ -361,7 +361,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <!-- Dynamic Fields (Table Number / Customer Name) -->
             <div id="orderDetailsFields">
                 <div id="tableNumberField" style="margin-bottom: 1rem;">
@@ -377,7 +377,7 @@
                     <input type="text" id="customerName" placeholder="Masukkan nama pelanggan" style="width: 100%; padding: 0.625rem; border: 1px solid #dee2e6; border-radius: 6px; font-size: 0.875rem;">
                 </div>
             </div>
-            
+
             <div class="payment-methods">
                 <div class="payment-method active" data-method="credit">
                     <i class="bi bi-credit-card-fill"></i>
@@ -392,7 +392,7 @@
                     <span>Tunai</span>
                 </div>
             </div>
-            
+
             <button class="btn-place-order" id="btnPlaceOrder" disabled>
                 Proses Pesanan
             </button>
@@ -417,23 +417,23 @@
                 <!-- Success Icon Circle -->
                 <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="white" viewBox="0 0 16 16" style="display: block;">
-                        <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                        <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z" />
                     </svg>
                 </div>
-                
+
                 <!-- Success Title -->
                 <h3 style="color: #28a745; font-weight: 700; margin-bottom: 1rem; font-size: 1.75rem;">Pesanan Berhasil!</h3>
-                
+
                 <!-- Order Details Box -->
                 <div id="successModalContent" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; padding: 1.5rem; text-align: left; margin-bottom: 1.5rem; border: 1px solid #dee2e6;">
                     <!-- Content will be injected here via JavaScript -->
                 </div>
-                
+
                 <!-- OK Button -->
-                <button type="button" class="btn btn-primary" style="min-width: 150px; padding: 0.75rem 2rem; background: linear-gradient(135deg, #3772F0 0%, #2563eb 100%); border: none; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 12px rgba(55, 114, 240, 0.3); transition: all 0.3s ease;" 
-                        onclick="bootstrap.Modal.getInstance(document.getElementById('successModal')).hide();"
-                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(55, 114, 240, 0.4)'"
-                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(55, 114, 240, 0.3)'">
+                <button type="button" class="btn btn-primary" style="min-width: 150px; padding: 0.75rem 2rem; background: linear-gradient(135deg, #3772F0 0%, #2563eb 100%); border: none; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 12px rgba(55, 114, 240, 0.3); transition: all 0.3s ease;"
+                    onclick="bootstrap.Modal.getInstance(document.getElementById('successModal')).hide();"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(55, 114, 240, 0.4)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(55, 114, 240, 0.3)'">
                     <i class="bi bi-check-circle me-2"></i> OK
                 </button>
             </div>
@@ -446,7 +446,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; border: none;">
-                <h5 class="modal-title" id="promoModalLabel">
+                <h5 class="modal-title text-white" id="promoModalLabel">
                     <i class="bi bi-tag-fill me-2"></i>Detail Promo
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -479,9 +479,9 @@
                     <label for="cashInput" class="form-label fw-semibold text-primary">
                         <i class="bi bi-wallet2"></i> Masukkan Jumlah Uang
                     </label>
-                    <input type="number" class="form-control form-control-lg text-end" id="cashInput" 
-                           placeholder="0" min="0" step="1000" autofocus 
-                           style="font-size: 1.5rem; font-weight: 600;">
+                    <input type="number" class="form-control form-control-lg text-end" id="cashInput"
+                        placeholder="0" min="0" step="1000" autofocus
+                        style="font-size: 1.5rem; font-weight: 600;">
                     <div class="form-text">Masukkan jumlah uang yang diterima dari pelanggan</div>
                 </div>
 
@@ -561,19 +561,16 @@
 
 <!-- Initialize POS System with server data -->
 <script>
-// Pass PHP data to JavaScript
-initializePOS(
-    <?= json_encode($promotions) ?>,
-    '<?= base_url('pos/checkout') ?>',
-    {
-        name: '<?= esc($outlet['name'] ?? 'OUTLET') ?>',
-        address: '<?= esc($outlet['address'] ?? '') ?>',
-        phone: '<?= esc($outlet['phone'] ?? '') ?>'
-    },
-    {
-        username: '<?= esc(auth()->user()->username ?? 'System') ?>'
-    }
-);
+    // Pass PHP data to JavaScript
+    initializePOS(
+        <?= json_encode($promotions) ?>,
+        '<?= base_url('pos/checkout') ?>', {
+            name: '<?= esc($outlet['name'] ?? 'OUTLET') ?>',
+            address: '<?= esc($outlet['address'] ?? '') ?>',
+            phone: '<?= esc($outlet['phone'] ?? '') ?>'
+        }, {
+            username: '<?= esc(auth()->user()->username ?? 'System') ?>'
+        }
+    );
 </script>
 <?= $this->endSection() ?>
-

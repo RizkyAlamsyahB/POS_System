@@ -60,6 +60,41 @@
     <?= csrf_field() ?>
 </form>
 
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Konfirmasi Hapus
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-3">
+                    <i class="bi bi-trash text-danger" style="font-size: 3rem;"></i>
+                </div>
+                <h5>Apakah Anda yakin?</h5>
+                <p class="text-muted mb-3">
+                    Outlet <strong id="deleteOutletName" class="text-dark"></strong> akan dihapus secara permanen.
+                </p>
+                <div class="alert alert-warning text-start small">
+                    <i class="bi bi-info-circle"></i> 
+                    <strong>Perhatian:</strong> Data yang sudah dihapus tidak dapat dikembalikan.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Batal
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
@@ -68,16 +103,43 @@
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
+// Store delete outlet ID temporarily
+let deleteOutletId = null;
+
 function confirmDelete(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus outlet ini?')) {
-        const form = document.getElementById('deleteForm');
-        form.action = '/admin/outlets/delete/' + id;
-        form.submit();
-    }
+    const row = event.target.closest('tr');
+    const outletName = row.cells[2].textContent.trim(); // Nama outlet di column ke-2
+    
+    // Set outlet name in modal
+    document.getElementById('deleteOutletName').textContent = outletName;
+    
+    // Store ID for later use
+    deleteOutletId = id;
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
 }
 
+// Handle confirm delete button
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        if (deleteOutletId) {
+            const form = document.getElementById('deleteForm');
+            form.action = '/admin/outlets/delete/' + deleteOutletId;
+            
+            // Hide modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            modal.hide();
+            
+            // Submit form
+            form.submit();
+        }
+    });
+});
+
 $(document).ready(function() {
-    $('#outletsTable').DataTable({
+    const table = $('#outletsTable').DataTable({
         processing: true,
         serverSide: true,
         ajax: {
@@ -95,6 +157,13 @@ $(document).ready(function() {
         ],
         order: [[2, 'asc']]  // Default sort by nama outlet
     });
+    
+    // Auto reload DataTable after CRUD operations
+    <?php if (session()->has('message') || session()->has('error')): ?>
+        setTimeout(function() {
+            table.ajax.reload(null, false);
+        }, 100);
+    <?php endif; ?>
 });
 </script>
 <?= $this->endSection() ?>

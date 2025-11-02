@@ -171,7 +171,7 @@ class OutletController extends BaseController
      */
     public function edit($id)
     {
-        $outlet = $this->outletModel->find($id);
+        $outlet = $this->outletModel->asObject()->find($id);
 
         if (!$outlet) {
             return redirect()->to('/admin/outlets')->with('error', 'Outlet tidak ditemukan!');
@@ -293,7 +293,7 @@ class OutletController extends BaseController
      */
     public function view($id)
     {
-        $outlet = $this->outletModel->find($id);
+        $outlet = $this->outletModel->asObject()->find($id);
 
         if (!$outlet) {
             return redirect()->to('/admin/outlets')->with('error', 'Outlet tidak ditemukan!');

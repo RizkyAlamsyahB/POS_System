@@ -64,6 +64,41 @@
     <?= csrf_field() ?>
 </form>
 
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Konfirmasi Hapus
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-3">
+                    <i class="bi bi-trash text-danger" style="font-size: 3rem;"></i>
+                </div>
+                <h5>Apakah Anda yakin?</h5>
+                <p class="text-muted mb-3">
+                    User <strong id="deleteUsername" class="text-dark"></strong> akan dihapus secara permanen.
+                </p>
+                <div class="alert alert-warning text-start small">
+                    <i class="bi bi-info-circle"></i> 
+                    <strong>Perhatian:</strong> Data yang sudah dihapus tidak dapat dikembalikan.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Batal
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
@@ -72,13 +107,41 @@
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
+// Store delete user ID temporarily
+let deleteUserId = null;
+
 function confirmDelete(id) {
-    if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-        const form = document.getElementById('deleteForm');
-        form.action = '/admin/users/delete/' + id;
-        form.submit();
-    }
+    // Get username from table row
+    const row = event.target.closest('tr');
+    const usernameCell = row.cells[1].textContent.trim().split('\n')[0];
+    
+    // Set username in modal
+    document.getElementById('deleteUsername').textContent = usernameCell;
+    
+    // Store ID for later use
+    deleteUserId = id;
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
 }
+
+// Handle confirm delete button
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        if (deleteUserId) {
+            const form = document.getElementById('deleteForm');
+            form.action = '/admin/users/delete/' + deleteUserId;
+            
+            // Hide modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            modal.hide();
+            
+            // Submit form
+            form.submit();
+        }
+    });
+});
 
 function toggleStatus(id) {
     const form = document.getElementById('toggleForm');
@@ -87,7 +150,7 @@ function toggleStatus(id) {
 }
 
 $(document).ready(function() {
-    $('#usersTable').DataTable({
+    const table = $('#usersTable').DataTable({
         processing: true,
         serverSide: true,
         ajax: {
@@ -104,6 +167,14 @@ $(document).ready(function() {
         ],
         order: [[1, 'asc']]  // Default sort by username
     });
+    
+    // Auto reload DataTable after CRUD operations
+    <?php if (session()->has('message') || session()->has('error')): ?>
+        // Reload table after successful operation
+        setTimeout(function() {
+            table.ajax.reload(null, false); // false = stay on current page
+        }, 100);
+    <?php endif; ?>
 });
 </script>
 <?= $this->endSection() ?>
