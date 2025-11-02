@@ -71,6 +71,13 @@ $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
     $routes->get('promotions/manage-items/(:num)', 'Admin\PromotionController::manageItems/$1');
     $routes->post('promotions/add-items/(:num)', 'Admin\PromotionController::addItems/$1');
     $routes->post('promotions/remove-item/(:num)/(:num)', 'Admin\PromotionController::removeItem/$1/$2');
+    
+    // Reports
+    $routes->get('reports', 'ReportController::adminSalesReport');
+    $routes->get('reports/transactions-datatable', 'ReportController::adminTransactionsDatatable');
+    
+    // Transaction Detail
+    $routes->get('transactions/detail/(:num)', 'DashboardController::adminTransactionDetail/$1');
 });
 
 // Manager routes (requires manager role + outlet active check)
@@ -86,6 +93,13 @@ $routes->group('manager', ['filter' => 'group:manager'], function($routes) {
     $routes->get('products/datatable', 'Manager\ProductController::datatable');
     $routes->get('products/view/(:num)', 'Manager\ProductController::view/$1');
     $routes->post('products/update-stock', 'Manager\ProductController::updateStock');
+    
+    // Reports
+    $routes->get('reports', 'ReportController::managerSalesReport');
+    $routes->get('reports/transactions-datatable', 'ReportController::managerTransactionsDatatable');
+    
+    // Transaction Detail
+    $routes->get('transactions/detail/(:num)', 'DashboardController::managerTransactionDetail/$1');
 });
 
 // POS routes (requires cashier role or above + outlet active check)
@@ -106,3 +120,6 @@ $routes->group('transactions', ['filter' => 'group:manager,admin'], function($ro
     $routes->get('datatable', 'Cashier\TransactionController::datatable');
     $routes->get('view/(:num)', 'Cashier\TransactionController::view/$1');
 });
+
+// API Routes for AJAX
+$routes->get('api/transaction-detail/(:num)', 'ReportController::transactionDetail/$1');

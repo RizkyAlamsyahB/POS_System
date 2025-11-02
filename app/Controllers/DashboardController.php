@@ -17,9 +17,47 @@ class DashboardController extends BaseController
      */
     public function adminDashboard()
     {
+        $db = \Config\Database::connect();
+        
+        // Count total outlets
+        $outletModel = new OutletModel();
+        $totalOutlets = $outletModel->countAll();
+        
+        // Count total users
+        $totalUsers = $db->table('users')->countAll();
+        
+        // Count total products
+        $productModel = new ProductModel();
+        $totalProducts = $productModel->countAll();
+        
+        // Today's sales
+        $todaySales = $db->table('transactions')
+            ->select('SUM(grand_total) as total')
+            ->where('DATE(created_at)', date('Y-m-d'))
+            ->where('payment_status', 'paid')
+            ->get()
+            ->getRow()
+            ->total ?? 0;
+        
+        // Recent transactions (last 10)
+        $recentTransactions = $db->table('transactions t')
+            ->select('t.id, t.transaction_code, t.grand_total, t.created_at, o.name as outlet_name, u.username as cashier_name')
+            ->join('outlets o', 'o.id = t.outlet_id', 'left')
+            ->join('users u', 'u.id = t.user_id', 'left')
+            ->where('t.payment_status', 'paid')
+            ->orderBy('t.created_at', 'DESC')
+            ->limit(10)
+            ->get()
+            ->getResultArray();
+        
         $data = [
             'title' => 'Admin Dashboard',
             'user'  => auth()->user(),
+            'totalOutlets' => $totalOutlets,
+            'totalUsers' => $totalUsers,
+            'totalProducts' => $totalProducts,
+            'todaySales' => $todaySales,
+            'recentTransactions' => $recentTransactions,
         ];
 
         return view('dashboard/admin-mazer', $data);
@@ -33,11 +71,50 @@ class DashboardController extends BaseController
         $user = auth()->user();
         $outletStatus = $this->checkOutletStatus($user);
         
+        $db = \Config\Database::connect();
+        $outletId = $user->outlet_id;
+        
+        // Today's sales for this outlet
+        $todaySales = $db->table('transactions')
+            ->select('SUM(grand_total) as total, COUNT(id) as count')
+            ->where('outlet_id', $outletId)
+            ->where('DATE(created_at)', date('Y-m-d'))
+            ->where('payment_status', 'paid')
+            ->get()
+            ->getRow();
+        
+        // Total products with stock in this outlet
+        $totalProducts = $db->table('product_stocks')
+            ->where('outlet_id', $outletId)
+            ->countAllResults();
+        
+        // Products with low stock (stock < 10)
+        $lowStock = $db->table('product_stocks')
+            ->where('outlet_id', $outletId)
+            ->where('stock <', 10)
+            ->countAllResults();
+        
+        // Recent transactions (last 10 for this outlet)
+        $recentTransactions = $db->table('transactions t')
+            ->select('t.id, t.transaction_code, t.grand_total, t.created_at, t.customer_name, u.username as cashier_name')
+            ->join('users u', 'u.id = t.user_id', 'left')
+            ->where('t.outlet_id', $outletId)
+            ->where('t.payment_status', 'paid')
+            ->orderBy('t.created_at', 'DESC')
+            ->limit(10)
+            ->get()
+            ->getResultArray();
+        
         $data = [
             'title' => 'Manager Dashboard',
             'user'  => $user,
             'outlet' => $outletStatus['outlet'],
             'outletInactive' => !$outletStatus['is_active'],
+            'todaySales' => $todaySales->total ?? 0,
+            'todayTransactions' => $todaySales->count ?? 0,
+            'totalProducts' => $totalProducts,
+            'lowStock' => $lowStock,
+            'recentTransactions' => $recentTransactions,
         ];
 
         return view('dashboard/manager', $data);
@@ -176,5 +253,74 @@ class DashboardController extends BaseController
             'outlet' => $outlet,
             'is_active' => $isActive,
         ];
+    }
+
+    /**
+     * Get transaction detail (Admin)
+     */
+    public function adminTransactionDetail($id)
+    {
+        $db = \Config\Database::connect();
+        
+        // Get transaction header
+        $transaction = $db->table('transactions t')
+            ->select('t.*, o.name as outlet_name, u.username as cashier_name')
+            ->join('outlets o', 'o.id = t.outlet_id', 'left')
+            ->join('users u', 'u.id = t.user_id', 'left')
+            ->where('t.id', $id)
+            ->get()
+            ->getRowArray();
+        
+        if (!$transaction) {
+            return $this->response->setJSON(['error' => 'Transaksi tidak ditemukan']);
+        }
+        
+        // Get transaction items
+        $items = $db->table('transaction_details td')
+            ->select('td.*, p.name as product_name')
+            ->join('products p', 'p.id = td.product_id', 'left')
+            ->where('td.transaction_id', $id)
+            ->get()
+            ->getResultArray();
+        
+        return $this->response->setJSON([
+            'transaction' => $transaction,
+            'items' => $items
+        ]);
+    }
+
+    /**
+     * Get transaction detail (Manager)
+     */
+    public function managerTransactionDetail($id)
+    {
+        $user = auth()->user();
+        $db = \Config\Database::connect();
+        
+        // Get transaction header - only from manager's outlet
+        $transaction = $db->table('transactions t')
+            ->select('t.*, u.username as cashier_name')
+            ->join('users u', 'u.id = t.user_id', 'left')
+            ->where('t.id', $id)
+            ->where('t.outlet_id', $user->outlet_id)
+            ->get()
+            ->getRowArray();
+        
+        if (!$transaction) {
+            return $this->response->setJSON(['error' => 'Transaksi tidak ditemukan atau bukan dari outlet Anda']);
+        }
+        
+        // Get transaction items
+        $items = $db->table('transaction_details td')
+            ->select('td.*, p.name as product_name')
+            ->join('products p', 'p.id = td.product_id', 'left')
+            ->where('td.transaction_id', $id)
+            ->get()
+            ->getResultArray();
+        
+        return $this->response->setJSON([
+            'transaction' => $transaction,
+            'items' => $items
+        ]);
     }
 }
