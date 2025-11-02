@@ -6,6 +6,7 @@ use App\Models\TransactionModel;
 use App\Models\TransactionDetailModel;
 use App\Models\ProductModel;
 use App\Models\ProductStockModel;
+use App\Libraries\PusherService;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class PosController extends BaseController
@@ -220,6 +221,18 @@ class PosController extends BaseController
             if ($db->transStatus() === false) {
                 throw new \Exception('Transaction failed');
             }
+
+            // Broadcast new transaction via Pusher
+            $pusher = new PusherService();
+            $pusher->broadcastNewTransaction(
+                $outletId,
+                $transactionId,
+                $transactionCode,
+                $grandTotal,
+                $paymentMethod,
+                $user->username,
+                $customerName ?? ''
+            );
 
             // Success response
             return $this->response->setJSON([

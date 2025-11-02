@@ -7,6 +7,7 @@ use App\Models\ProductModel;
 use App\Models\CategoryModel;
 use App\Models\ProductStockModel;
 use App\Models\OutletModel;
+use App\Libraries\PusherService;
 
 class ProductController extends BaseController
 {
@@ -224,6 +225,15 @@ class ProductController extends BaseController
         }
 
         if ($result) {
+            // Broadcast stock update via Pusher
+            $pusher = new PusherService();
+            $pusher->broadcastStockUpdate(
+                $outletId,
+                $productId,
+                $newStock,
+                $product['name']
+            );
+
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Stok berhasil diupdate!',
