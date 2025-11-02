@@ -53,13 +53,6 @@ function initializePOS(promotionsData, posCheckoutUrl, outlet, user) {
     outletData = outlet;
     currentUser = user;
     
-    console.log('POS Initialized with:', {
-        promotions: activePromotions,
-        checkoutUrl: checkoutUrl,
-        outlet: outletData,
-        user: currentUser
-    });
-    
     updateInvoice();
 }
 
@@ -101,8 +94,6 @@ document.querySelectorAll('.order-type-btn').forEach(btn => {
 
 // Show promotion details modal
 function showPromoDetails(promo) {
-    console.log('Show promo details:', promo);
-    
     // Format days
     const daysMap = {
         'monday': 'Senin',
@@ -265,15 +256,12 @@ function calculatePromoDiscount(product, quantity) {
                           promo.product_ids.includes(product.id.toString()) ||
                           promo.product_ids.includes(product.id);
         
-        console.log('Checking promo:', promo.code, 'for product:', product.id, 'eligible:', isEligible);
-        
         if (!isEligible) continue;
         
         const itemSubtotal = product.price * quantity;
         
         // Check minimum purchase requirement
         if (promo.min_purchase && itemSubtotal < parseFloat(promo.min_purchase)) {
-            console.log('Min purchase not met:', itemSubtotal, '<', promo.min_purchase);
             continue;
         }
         
@@ -288,8 +276,6 @@ function calculatePromoDiscount(product, quantity) {
         } else if (promo.discount_type === 'fixed_amount') {
             discount = parseFloat(promo.discount_value);
         }
-        
-        console.log('Discount calculated:', discount, 'from promo:', promo.code);
         
         appliedPromo = promo;
         break; // Use first applicable promo only
@@ -496,42 +482,16 @@ function updateTotals() {
                 const taxDivisor = 1 + (item.tax_rate / 100); // 1.11 untuk PPN 11%
                 const includedTax = (priceAfterDiscount / taxDivisor) * (item.tax_rate / 100);
                 totalIncludedTax += includedTax;
-                
-                console.log(`Tax INCLUDED for ${item.name}:`, {
-                    subtotal: itemSubtotal,
-                    discount: promoResult.discount,
-                    priceAfterDiscount: priceAfterDiscount,
-                    taxRate: item.tax_rate + '%',
-                    includedTax: includedTax,
-                    note: 'Tax sudah termasuk dalam harga (tidak menambah total)'
-                });
             } else {
                 // Tax belum termasuk - ditambahkan ke total
                 const taxableAmount = itemSubtotal - promoResult.discount;
                 const itemTax = taxableAmount * (item.tax_rate / 100);
                 totalTax += itemTax;
-                
-                console.log(`Tax ADDED for ${item.name}:`, {
-                    subtotal: itemSubtotal,
-                    discount: promoResult.discount,
-                    taxableAmount: taxableAmount,
-                    taxRate: item.tax_rate + '%',
-                    tax: itemTax,
-                    note: 'Tax ditambahkan ke total'
-                });
             }
         }
     });
     
     const total = subtotal - totalDiscount + totalTax;
-    
-    console.log('Payment Summary:', {
-        subtotal: subtotal,
-        discount: totalDiscount,
-        taxAdded: totalTax,
-        taxIncluded: totalIncludedTax,
-        total: total
-    });
     
     // Update display
     document.getElementById('subTotal').textContent = formatCurrency(subtotal);
@@ -763,13 +723,8 @@ function processCheckout(checkoutData) {
         },
         body: JSON.stringify(checkoutData)
     })
-    .then(response => {
-        console.log('Response status:', response.status);
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log('Response data:', data);
-        
         if (data.success) {
             const change = data.data.change_amount || 0;
             const total = data.data.grand_total;
@@ -853,7 +808,6 @@ function processCheckout(checkoutData) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
         alert('❌ An error occurred during checkout!');
     })
     .finally(() => {
