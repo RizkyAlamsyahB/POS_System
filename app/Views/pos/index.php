@@ -261,22 +261,22 @@
                                     <?= esc(!empty($product['description']) ? $product['description'] : $product['category_name'] ?? 'Produk berkualitas') ?>
                                 </div>
 
-  <!-- Stock Badge -->
-<div style="margin-bottom: 0.5rem;">
-    <?php if ($stock > 10): ?>
-        <span class="stock-badge bg-success text-white" style="background: #198754; color: #fff; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
-            <i class="bi bi-box-seam"></i> Stok: <?= $stock ?>
-        </span>
-    <?php elseif ($stock > 0): ?>
-        <span class="stock-badge bg-warning text-white" style="background: #ffc107; color: #fff; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
-            <i class="bi bi-exclamation-triangle"></i> Stok: <?= $stock ?>
-        </span>
-    <?php else: ?>
-        <span class="stock-badge bg-danger text-white" style="background: #dc3545; color: #fff; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
-            <i class="bi bi-x-circle"></i> Habis
-        </span>
-    <?php endif; ?>
-</div>
+                                <!-- Stock Badge -->
+                                <div style="margin-bottom: 0.5rem;">
+                                    <?php if ($stock > 10): ?>
+                                        <span class="stock-badge bg-success text-white" style="background: #198754; color: #fff; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                                            <i class="bi bi-box-seam"></i> Stok: <?= $stock ?>
+                                        </span>
+                                    <?php elseif ($stock > 0): ?>
+                                        <span class="stock-badge bg-warning text-white" style="background: #ffc107; color: #fff; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                                            <i class="bi bi-exclamation-triangle"></i> Stok: <?= $stock ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="stock-badge bg-danger text-white" style="background: #dc3545; color: #fff; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                                            <i class="bi bi-x-circle"></i> Habis
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
 
 
                                 <div class="menu-card-footer">
@@ -581,11 +581,6 @@
 
     // Initialize Pusher for real-time stock updates
     (function() {
-        // Enable pusher logging for development (disable in production)
-        <?php if (ENVIRONMENT === 'development'): ?>
-        Pusher.logToConsole = true;
-        <?php endif; ?>
-
         // Initialize Pusher
         const pusher = new Pusher('<?= env('pusher.appKey', '16c9b2af70ac324000d9') ?>', {
             cluster: '<?= env('pusher.appCluster', 'ap1') ?>',
@@ -598,11 +593,9 @@
 
         // Listen for stock-updated event
         channel.bind('stock-updated', function(data) {
-            console.log('Stock update received:', data);
-            
             // Update stock display in POS
             updateProductStock(data.product_id, data.new_stock);
-            
+
             // Show notification
             showStockUpdateNotification(data);
         });
@@ -613,9 +606,8 @@
         function updateProductStock(productId, newStock) {
             // Find product card by data-product-id attribute
             const productCard = document.querySelector(`[data-product-id="${productId}"]`);
-            
+
             if (!productCard) {
-                console.log(`Product ${productId} not found in current view`);
                 return;
             }
 
@@ -623,7 +615,7 @@
             const stockBadge = productCard.querySelector('.stock-badge');
             if (stockBadge) {
                 stockBadge.textContent = `Stok: ${newStock}`;
-                
+
                 // Update badge color based on stock level
                 stockBadge.classList.remove('bg-danger', 'bg-warning', 'bg-success');
                 if (newStock <= 0) {
@@ -664,12 +656,12 @@
                     </div>
                 </div>
             `;
-            
+
             // Append to body
             const toastContainer = document.createElement('div');
             toastContainer.innerHTML = toastHtml;
             document.body.appendChild(toastContainer);
-            
+
             // Show toast
             const toastElement = toastContainer.querySelector('.toast');
             const toast = new bootstrap.Toast(toastElement, {
@@ -677,14 +669,12 @@
                 delay: 5000
             });
             toast.show();
-            
+
             // Remove from DOM after hidden
             toastElement.addEventListener('hidden.bs.toast', function() {
                 toastContainer.remove();
             });
         }
-
-        console.log('Pusher initialized and listening on channel: stock-updates-' + outletId);
     })();
 </script>
 <?= $this->endSection() ?>
