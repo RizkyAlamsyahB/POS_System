@@ -69,8 +69,8 @@ class CategoryController extends BaseController
         $db = \Config\Database::connect();
         $builder = $db->table('categories');
         $builder->select('categories.*, COUNT(products.id) as product_count')
-                ->join('products', 'products.category_id = categories.id', 'left')
-                ->groupBy('categories.id');
+                ->join('products', 'products.category_id = categories.id AND products.deleted_at IS NULL', 'left')
+                ->groupBy('categories.id, categories.name, categories.description, categories.created_at, categories.updated_at, categories.deleted_at');
 
         // Apply search filter
         if (!empty($search)) {
@@ -80,8 +80,8 @@ class CategoryController extends BaseController
             ->groupEnd();
         }
 
-        // Get total records
-        $totalRecords = $this->categoryModel->countAll();
+        // Get total records (including soft deleted)
+        $totalRecords = $db->table('categories')->countAll();
         
         // Get filtered records count
         $builderCount = clone $builder;
@@ -96,9 +96,16 @@ class CategoryController extends BaseController
         // Format data for DataTable
         $data = [];
         foreach ($categories as $index => $category) {
+            $categoryName = '<strong>' . esc($category['name']) . '</strong>';
+            
+            // Add deleted badge if category is soft deleted
+            if ($category['deleted_at']) {
+                $categoryName .= ' <span class="badge bg-danger ms-1">Dihapus</span>';
+            }
+            
             $data[] = [
                 $start + $index + 1,
-                '<strong>' . esc($category['name']) . '</strong>',
+                $categoryName,
                 esc($category['description'] ?? '-'),
                 '<span class="badge bg-primary">' . $category['product_count'] . ' produk</span>',
                 view('admin/categories/_actions', ['category' => $category]),
@@ -196,7 +203,7 @@ class CategoryController extends BaseController
     }
 
     /**
-     * Delete category
+     * Delete category (soft delete)
      */
     public function delete($id)
     {
@@ -206,15 +213,39 @@ class CategoryController extends BaseController
             return redirect()->to('/admin/categories')->with('error', 'Kategori tidak ditemukan!');
         }
 
-        // Check if category has products
-        if ($this->categoryModel->hasProducts($id)) {
-            return redirect()->to('/admin/categories')->with('error', 'Kategori tidak dapat dihapus karena masih memiliki produk!');
-        }
-
+        // Soft delete - tidak perlu cek products
+        // Produk tetap aman dengan kategori soft deleted
+        
         if ($this->categoryModel->delete($id)) {
             return redirect()->to('/admin/categories')->with('message', 'Kategori berhasil dihapus!');
         }
 
         return redirect()->to('/admin/categories')->with('error', 'Gagal menghapus kategori!');
+    }
+
+    /**
+     * Restore soft deleted category
+     */
+    public function restore($id)
+    {
+        $category = $this->categoryModel->withDeleted()->find($id);
+
+        if (!$category) {
+            return redirect()->back()->with('error', 'Kategori tidak ditemukan!');
+        }
+
+        if (!$category['deleted_at']) {
+            return redirect()->back()->with('error', 'Kategori tidak dalam status dihapus!');
+        }
+
+        // Use Query Builder to bypass soft delete filter
+        $db = \Config\Database::connect();
+        $builder = $db->table('categories');
+        
+        if ($builder->where('id', $id)->update(['deleted_at' => null])) {
+            return redirect()->back()->with('message', 'Kategori berhasil dipulihkan!');
+        }
+
+        return redirect()->back()->with('error', 'Gagal memulihkan kategori!');
     }
 }

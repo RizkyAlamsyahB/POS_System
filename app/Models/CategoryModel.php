@@ -12,6 +12,8 @@ class CategoryModel extends Model
     protected $useTimestamps = true;
     protected $createdField = 'created_at';
     protected $updatedField = 'updated_at';
+    protected $useSoftDeletes = true;
+    protected $deletedField = 'deleted_at';
 
     protected $validationRules = [
         'name' => 'required|max_length[100]|is_unique[categories.name,id,{id}]',

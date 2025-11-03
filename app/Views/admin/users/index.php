@@ -74,17 +74,17 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body text-center py-4">
+                        <div class="modal-body text-center py-4">
                 <div class="mb-3">
                     <i class="bi bi-trash text-danger" style="font-size: 3rem;"></i>
                 </div>
                 <h5>Apakah Anda yakin?</h5>
                 <p class="text-muted mb-3">
-                    User <strong id="deleteUsername" class="text-dark"></strong> akan dihapus secara permanen.
+                    User <strong id="deleteUsername" class="text-dark"></strong> akan dihapus.
                 </p>
-                <div class="alert alert-warning text-start small">
+                <div class="alert alert-info text-start small">
                     <i class="bi bi-info-circle"></i> 
-                    <strong>Perhatian:</strong> Data yang sudah dihapus tidak dapat dikembalikan.
+                    <strong>Catatan:</strong> User yang dihapus masih bisa dipulihkan kembali menggunakan tombol "Pulihkan".
                 </div>
             </div>
             <div class="modal-footer">
@@ -124,6 +124,25 @@ function confirmDelete(id) {
     // Show modal
     const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     modal.show();
+}
+
+function confirmRestore(id) {
+    if (confirm('Apakah Anda yakin ingin memulihkan user ini? User akan aktif kembali.')) {
+        // Create form and submit
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/users/restore/' + id;
+        
+        // Add CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '<?= csrf_token() ?>';
+        csrfInput.value = '<?= csrf_hash() ?>';
+        form.appendChild(csrfInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
 }
 
 // Handle confirm delete button

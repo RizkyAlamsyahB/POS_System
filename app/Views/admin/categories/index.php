@@ -62,36 +62,41 @@
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
+            <div class="modal-header bg-info text-white">
                 <h5 class="modal-title" id="deleteModalLabel">
-                    <i class="bi bi-exclamation-triangle-fill"></i> Konfirmasi Hapus
+                    <i class="bi bi-info-circle-fill"></i> Catatan
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center py-4">
                 <div class="mb-3">
-                    <i class="bi bi-trash text-danger" style="font-size: 3rem;"></i>
+                    <i class="bi bi-trash text-info" style="font-size: 3rem;"></i>
                 </div>
                 <h5>Apakah Anda yakin?</h5>
                 <p class="text-muted mb-3">
-                    Kategori <strong id="deleteCategoryName" class="text-dark"></strong> akan dihapus secara permanen.
+                    Kategori <strong id="deleteCategoryName" class="text-dark"></strong> akan dihapus.
                 </p>
-                <div class="alert alert-warning text-start small">
+                <div class="alert alert-info text-start small">
                     <i class="bi bi-info-circle"></i> 
-                    <strong>Perhatian:</strong> Data yang sudah dihapus tidak dapat dikembalikan.
+                    <strong>Catatan:</strong> Kategori yang dihapus masih bisa dipulihkan kembali.
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     Batal
                 </button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                <button type="button" class="btn btn-info" id="confirmDeleteBtn">
                     Hapus
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Restore Form (hidden) -->
+<form id="restoreForm" method="POST" style="display: none;">
+    <?= csrf_field() ?>
+</form>
 
 <?= $this->endSection() ?>
 
@@ -117,6 +122,14 @@ function confirmDelete(id) {
     // Show modal
     const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     modal.show();
+}
+
+function confirmRestore(id) {
+    if (confirm('Apakah Anda yakin ingin memulihkan kategori ini?')) {
+        const form = document.getElementById('restoreForm');
+        form.action = '/admin/categories/restore/' + id;
+        form.submit();
+    }
 }
 
 // Handle confirm delete button

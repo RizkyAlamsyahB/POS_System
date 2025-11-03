@@ -98,14 +98,24 @@ class OutletController extends BaseController
         // Format data for DataTable
         $data = [];
         foreach ($outlets as $index => $outlet) {
-            $statusBadge = $outlet['is_active'] 
-                ? '<span class="badge bg-success">Aktif</span>' 
-                : '<span class="badge bg-danger">Nonaktif</span>';
+            // Status badge - check deleted first, then is_active
+            if ($outlet['deleted_at']) {
+                $statusBadge = '<span class="badge bg-secondary">Dihapus</span>';
+            } else {
+                $statusBadge = $outlet['is_active'] 
+                    ? '<span class="badge bg-success">Aktif</span>' 
+                    : '<span class="badge bg-danger">Nonaktif</span>';
+            }
+            
+            $outletName = '<strong>' . esc($outlet['name']) . '</strong>';
+            if ($outlet['deleted_at']) {
+                $outletName .= ' <span class="badge bg-danger ms-2">Dihapus</span>';
+            }
             
             $data[] = [
                 $start + $index + 1,
                 '<code>' . esc($outlet['code']) . '</code>',
-                '<strong>' . esc($outlet['name']) . '</strong>',
+                $outletName,
                 esc($outlet['address'] ?? '-'),
                 esc($outlet['phone'] ?? '-'),
                 $statusBadge,
@@ -258,7 +268,7 @@ class OutletController extends BaseController
     }
 
     /**
-     * Delete outlet
+     * Delete outlet (soft delete)
      */
     public function delete($id)
     {
@@ -268,24 +278,40 @@ class OutletController extends BaseController
             return redirect()->to('/admin/outlets')->with('error', 'Outlet tidak ditemukan!');
         }
 
-        // Check if outlet has users
-        $usersCount = $this->userModel->where('outlet_id', $id)->countAllResults();
-        if ($usersCount > 0) {
-            return redirect()->to('/admin/outlets')->with('error', 'Outlet tidak dapat dihapus karena masih memiliki ' . $usersCount . ' pengguna!');
-        }
-
-        // Check if outlet has stocks
-        $db = \Config\Database::connect();
-        $stocksCount = $db->table('product_stocks')->where('outlet_id', $id)->countAllResults();
-        if ($stocksCount > 0) {
-            return redirect()->to('/admin/outlets')->with('error', 'Outlet tidak dapat dihapus karena masih memiliki stok produk!');
-        }
-
+        // Soft delete - tidak perlu cek users atau stocks
+        // Data relasi tetap aman, outlet hanya di-hide
+        
         if ($this->outletModel->delete($id)) {
             return redirect()->to('/admin/outlets')->with('message', 'Outlet berhasil dihapus!');
         }
 
         return redirect()->to('/admin/outlets')->with('error', 'Gagal menghapus outlet!');
+    }
+
+    /**
+     * Restore soft deleted outlet
+     */
+    public function restore($id)
+    {
+        $outlet = $this->outletModel->withDeleted()->find($id);
+
+        if (!$outlet) {
+            return redirect()->back()->with('error', 'Outlet tidak ditemukan!');
+        }
+
+        if (!$outlet['deleted_at']) {
+            return redirect()->back()->with('error', 'Outlet tidak dalam status dihapus!');
+        }
+
+        // Use Query Builder to bypass soft delete filter
+        $db = \Config\Database::connect();
+        $builder = $db->table('outlets');
+        
+        if ($builder->where('id', $id)->update(['deleted_at' => null])) {
+            return redirect()->back()->with('message', 'Outlet berhasil dipulihkan!');
+        }
+
+        return redirect()->back()->with('error', 'Gagal memulihkan outlet!');
     }
 
     /**

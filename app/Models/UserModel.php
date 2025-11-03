@@ -6,6 +6,9 @@ use CodeIgniter\Shield\Models\UserModel as ShieldUserModel;
 
 class UserModel extends ShieldUserModel
 {
+    protected $useSoftDeletes = true;
+    protected $deletedField = 'deleted_at';
+    
     protected $allowedFields = [
         'username',
         'status',

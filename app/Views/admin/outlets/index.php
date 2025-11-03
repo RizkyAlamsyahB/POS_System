@@ -76,11 +76,11 @@
                 </div>
                 <h5>Apakah Anda yakin?</h5>
                 <p class="text-muted mb-3">
-                    Outlet <strong id="deleteOutletName" class="text-dark"></strong> akan dihapus secara permanen.
+                    Outlet <strong id="deleteOutletName" class="text-dark"></strong> akan dihapus.
                 </p>
-                <div class="alert alert-warning text-start small">
+                <div class="alert alert-info text-start small">
                     <i class="bi bi-info-circle"></i> 
-                    <strong>Perhatian:</strong> Data yang sudah dihapus tidak dapat dikembalikan.
+                    <strong>Catatan:</strong> Outlet yang dihapus masih bisa dipulihkan kembali menggunakan tombol "Pulihkan".
                 </div>
             </div>
             <div class="modal-footer">
@@ -119,6 +119,25 @@ function confirmDelete(id) {
     // Show modal
     const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     modal.show();
+}
+
+function confirmRestore(id) {
+    if (confirm('Apakah Anda yakin ingin memulihkan outlet ini? Outlet akan aktif kembali.')) {
+        // Create form and submit
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/outlets/restore/' + id;
+        
+        // Add CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '<?= csrf_token() ?>';
+        csrfInput.value = '<?= csrf_hash() ?>';
+        form.appendChild(csrfInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
 }
 
 // Handle confirm delete button
