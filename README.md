@@ -51,9 +51,9 @@ Sistem Point of Sale (POS) berbasis web untuk mengelola **multiple outlet** deng
 
 ## 🛠️ Tech Stack
 
-- **Framework**: CodeIgniter 4.5+
-- **PHP**: 8.1+ (8.2+ recommended)
-- **Database**: MySQL 5.7+ / MariaDB 10.3+
+- **Framework**: CodeIgniter 4.6+
+- **PHP**: 8.4+ (8.4+ recommended)
+- **Database**: MySQL 8.4+
 - **Authentication**: CodeIgniter Shield 1.2+
 - **Frontend**: Bootstrap 5 + Mazer Admin Template
 - **UI Components**: DataTables, Bootstrap Icons, Iconly
@@ -63,9 +63,9 @@ Sistem Point of Sale (POS) berbasis web untuk mengelola **multiple outlet** deng
 ## 🚀 Quick Start
 
 ### Prerequisites
-- PHP 8.1 atau lebih tinggi  
+- PHP 8.4 atau lebih tinggi  
 - Composer  
-- MySQL 5.7+ atau MariaDB 10.3+  
+- MySQL 8.4+  
 - Web server (Apache/Nginx) atau PHP built-in server  
 
 ### Installation
