@@ -117,12 +117,24 @@ CREATE DATABASE pos_system;
 exit;
 ```
 
-5. **Jalankan Migration**
+5. **Setup Direktori Writable (PENTING!)**
+```bash
+# Buat direktori yang dibutuhkan CodeIgniter
+mkdir -p writable/cache
+mkdir -p writable/logs
+
+# Set permission yang benar
+chmod -R 755 writable/
+```
+
+> **⚠️ Troubleshooting**: Jika Anda mendapat error `Cache unable to write to "writable/cache/"` saat menjalankan migration, pastikan direktori `writable/cache/` dan `writable/logs/` sudah ada dan memiliki permission yang benar.
+
+6. **Jalankan Migration**
 ```bash
 php spark migrate --all
 ```
 
-6. **Seed Data Awal**
+7. **Seed Data Awal**
 ```bash
 # Seed outlet dan users
 php spark db:seed InitialDataSeeder
@@ -134,7 +146,7 @@ php spark db:seed ProductDataSeeder
 php spark db:seed PromotionSeeder
 ```
 
-7. **Jalankan Server**
+8. **Jalankan Server**
 ```bash
 php spark serve
 ```
@@ -337,6 +349,78 @@ Setelah seeding, Anda dapat login dengan:
 - CategoryModel: 14 tests
 - ProductModel: 14 tests
 - PromotionModel: 15 tests
+
+## 🔧 Troubleshooting
+
+### ❌ Error: "Cache unable to write to writable/cache/"
+
+**Penyebab**: Direktori `writable/cache/` tidak ada atau permission tidak sesuai.
+
+**Solusi**:
+```bash
+# Buat direktori yang hilang
+mkdir -p writable/cache
+mkdir -p writable/logs
+
+# Set permission yang benar
+chmod -R 755 writable/
+
+# Atau untuk development environment (lebih permisif)
+chmod -R 777 writable/
+```
+
+### ❌ Error Database Connection
+
+**Penyebab**: Konfigurasi database di `.env` salah atau database belum dibuat.
+
+**Solusi**:
+1. Pastikan database sudah dibuat:
+```sql
+CREATE DATABASE pos_system;
+```
+
+2. Cek konfigurasi di `.env`:
+```env
+database.default.hostname = localhost
+database.default.database = pos_system
+database.default.username = root
+database.default.password = your_password
+```
+
+### ❌ Error 500 Internal Server Error
+
+**Penyebab**: Biasanya masalah permission atau konfigurasi web server.
+
+**Solusi**:
+1. **Untuk Apache**: Pastikan document root mengarah ke folder `public/`
+2. **Untuk Nginx**: Set root ke `public/` dan konfigurasi try_files
+3. **Development**: Gunakan `php spark serve` untuk testing
+
+### ❌ Login Gagal "Invalid credentials"
+
+**Penyebab**: Data seeder belum dijalankan atau password salah.
+
+**Solusi**:
+```bash
+# Jalankan seeder untuk buat user default
+php spark db:seed InitialDataSeeder
+```
+
+Gunakan kredensial default:
+- Username: `admin` / Password: `admin123`
+
+### ❌ Error "Route not found"
+
+**Penyebab**: URL rewriting tidak berfungsi atau baseURL salah.
+
+**Solusi**:
+1. Cek `.env`:
+```env
+app.baseURL = 'http://localhost:8080/'
+```
+
+2. Untuk Apache, pastikan `.htaccess` ada di folder `public/`
+3. Untuk development, selalu gunakan `php spark serve`
 
 ##  Documentation
 
