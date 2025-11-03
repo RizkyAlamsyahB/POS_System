@@ -119,32 +119,12 @@ CREATE DATABASE pos_system;
 exit;
 ```
 
-#### 5. Setup Permission Folder Writable
-```bash
-# Set permission untuk folder writable
-chmod -R 755 writable/
-
-# Jika masih error permission (development only):
-chmod -R 777 writable/
-```
-
-> **📌 Catatan**: Folder `writable/` sudah include struktur lengkap dari repository:
-> - `writable/cache/` - untuk cache sistem
-> - `writable/logs/` - untuk log aplikasi  
-> - `writable/session/` - untuk session files
-> - `writable/uploads/` - untuk file upload user
-> - `writable/debugbar/` - untuk debug toolbar
->
-> Setiap folder sudah dilindungi dengan `index.html` untuk mencegah directory listing.
-
-> **🚀 Auto-Create Upload Directories**: Sistem otomatis membuat folder upload yang diperlukan (seperti `public/uploads/products/`) saat pertama kali ada upload file. Tidak perlu dibuat manual!
-
-#### 6. Jalankan Migration
+#### 5. Jalankan Migration
 ```bash
 php spark migrate --all
 ```
 
-#### 7. Seed Data Awal
+#### 6. Seed Data Awal
 ```bash
 # Seed outlet dan users (WAJIB)
 php spark db:seed InitialDataSeeder
@@ -156,7 +136,7 @@ php spark db:seed ProductDataSeeder
 php spark db:seed PromotionSeeder
 ```
 
-#### 8. Jalankan Server
+#### 7. Jalankan Server
 ```bash
 php spark serve
 ```
