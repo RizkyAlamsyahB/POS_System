@@ -72,7 +72,7 @@ class UserController extends BaseController
         // Build query with proper joins
         $db = \Config\Database::connect();
         $builder = $db->table('users');
-        $builder->select('users.id, users.username, users.outlet_id, users.active, outlets.name as outlet_name, auth_identities.secret as email')
+        $builder->select('users.id, users.username, users.outlet_id, users.active, users.deleted_at, outlets.name as outlet_name, auth_identities.secret as email')
                 ->join('outlets', 'outlets.id = users.outlet_id', 'left')
                 ->join('auth_identities', 'auth_identities.user_id = users.id AND auth_identities.type = "email_password"', 'left')
                 ->join('auth_groups_users', 'auth_groups_users.user_id = users.id', 'left')
@@ -121,9 +121,14 @@ class UserController extends BaseController
         // Format data for DataTable
         $data = [];
         foreach ($users as $index => $user) {
-            $statusBadge = $user['active'] 
-                ? '<span class="badge bg-success">Aktif</span>' 
-                : '<span class="badge bg-danger">Nonaktif</span>';
+            // Status badge - check deleted first
+            if ($user['deleted_at']) {
+                $statusBadge = '<span class="badge bg-secondary">Dihapus</span>';
+            } else {
+                $statusBadge = $user['active'] 
+                    ? '<span class="badge bg-success">Aktif</span>' 
+                    : '<span class="badge bg-danger">Nonaktif</span>';
+            }
             
             $role = $roles[$user['id']] ?? 'unknown';
             $roleBadge = match($role) {
@@ -137,9 +142,14 @@ class UserController extends BaseController
                 ? esc($user['outlet_name'])
                 : '<small class="text-muted">Super Admin (All Outlets)</small>';
             
+            $username = '<strong>' . esc($user['username']) . '</strong>';
+            if ($user['deleted_at']) {
+                $username .= ' <span class="badge bg-danger ms-2">Dihapus</span>';
+            }
+            
             $data[] = [
                 $start + $index + 1,
-                '<strong>' . esc($user['username']) . '</strong><br><small class="text-muted">' . esc($user['email'] ?? '-') . '</small>',
+                $username . '<br><small class="text-muted">' . esc($user['email'] ?? '-') . '</small>',
                 $roleBadge,
                 $outletInfo,
                 $statusBadge,
@@ -326,7 +336,7 @@ class UserController extends BaseController
     }
 
     /**
-     * Delete user
+     * Delete user (soft delete)
      */
     public function delete($id)
     {
@@ -341,10 +351,36 @@ class UserController extends BaseController
             return redirect()->to('/admin/users')->with('error', 'Tidak dapat menghapus user yang sedang login');
         }
 
-        // Force hard delete
-        $this->userModel->delete($id, true);
+        // Soft delete
+        $this->userModel->delete($id);
 
         return redirect()->to('/admin/users')->with('message', 'User berhasil dihapus');
+    }
+
+    /**
+     * Restore soft deleted user
+     */
+    public function restore($id)
+    {
+        $user = $this->userModel->withDeleted()->find($id);
+
+        if (!$user) {
+            return redirect()->back()->with('error', 'User tidak ditemukan!');
+        }
+
+        if (!$user->deleted_at) {
+            return redirect()->back()->with('error', 'User tidak dalam status dihapus!');
+        }
+
+        // Use Query Builder to bypass soft delete filter
+        $db = \Config\Database::connect();
+        $builder = $db->table('users');
+        
+        if ($builder->where('id', $id)->update(['deleted_at' => null])) {
+            return redirect()->back()->with('message', 'User berhasil dipulihkan!');
+        }
+
+        return redirect()->back()->with('error', 'Gagal memulihkan user!');
     }
 
     /**

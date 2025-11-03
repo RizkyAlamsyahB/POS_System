@@ -79,13 +79,11 @@ class ProductController extends BaseController
         $orderBy = isset($columns[$orderCol]) ? $columns[$orderCol] : 'products.name';
         $orderDir = ($orderDir === 'desc') ? 'DESC' : 'ASC';
 
-        // Build query - Using proper JOIN with stock aggregation
+        // Build query - Simplified without aggregation to avoid GROUP BY issues
         $db = \Config\Database::connect();
         $builder = $db->table('products');
-        $builder->select('products.*, categories.name as category_name, COALESCE(SUM(product_stocks.stock), 0) as total_stock')
-                ->join('categories', 'categories.id = products.category_id', 'left')
-                ->join('product_stocks', 'product_stocks.product_id = products.id', 'left')
-                ->groupBy('products.id');
+        $builder->select('products.*, categories.name as category_name')
+                ->join('categories', 'categories.id = products.category_id', 'left');
 
         // Apply search filter
         if (!empty($search)) {
@@ -98,7 +96,7 @@ class ProductController extends BaseController
         }
 
         // Get total records (before filtering)
-        $totalRecords = $this->productModel->countAll();
+        $totalRecords = $this->productModel->withDeleted()->countAllResults(false);
         
         // Get filtered records count (need to clone builder for count)
         $builderCount = clone $builder;
@@ -113,6 +111,7 @@ class ProductController extends BaseController
         // Get stock details per outlet for each product
         $productIds = array_column($products, 'id');
         $stockDetails = [];
+        $stockTotals = [];
         
         if (!empty($productIds)) {
             $stockBuilder = $db->table('product_stocks');
@@ -127,14 +126,22 @@ class ProductController extends BaseController
                     'outlet' => $stock['outlet_name'],
                     'stock' => $stock['stock']
                 ];
+                
+                // Calculate total stock per product
+                if (!isset($stockTotals[$stock['product_id']])) {
+                    $stockTotals[$stock['product_id']] = 0;
+                }
+                $stockTotals[$stock['product_id']] += (int)$stock['stock'];
             }
         }
 
         // Format data for DataTable
         $data = [];
         foreach ($products as $index => $product) {
+            $totalStock = $stockTotals[$product['id']] ?? 0;
+            
             // Build stock info HTML
-            $stockHtml = '<strong>' . number_format($product['total_stock'], 0, ',', '.') . '</strong>';
+            $stockHtml = '<strong>' . number_format($totalStock, 0, ',', '.') . '</strong>';
             
             if (isset($stockDetails[$product['id']])) {
                 $stockHtml .= '<br><small class="text-muted">';
@@ -148,11 +155,17 @@ class ProductController extends BaseController
                 $stockHtml .= '<br><small class="text-warning">Belum ada stok</small>';
             }
             
+            // Product name with deleted badge
+            $productName = '<strong>' . esc($product['name']) . '</strong>';
+            if ($product['deleted_at']) {
+                $productName .= ' <span class="badge bg-danger ms-2">Dihapus</span>';
+            }
+            
             $data[] = [
                 $start + $index + 1,                                           // No
                 '<code>' . esc($product['sku']) . '</code>',                   // SKU
                 '<code>' . esc($product['barcode']) . '</code>',              // Barcode
-                '<strong>' . esc($product['name']) . '</strong>',             // Nama Produk
+                $productName,                                                  // Nama Produk + badge
                 esc($product['category_name'] ?? '-'),                        // Kategori
                 'Rp ' . number_format($product['price'], 0, ',', '.'),       // Harga Jual
                 'Rp ' . number_format($product['cost_price'], 0, ',', '.'),  // HPP
@@ -340,7 +353,7 @@ class ProductController extends BaseController
         return redirect()->back()->withInput()->with('error', 'Gagal mengupdate produk!');
     }
     /**
-     * Delete product
+     * Delete product (soft delete)
      */
     public function delete($id)
     {
@@ -350,11 +363,9 @@ class ProductController extends BaseController
             return redirect()->to('/admin/products')->with('error', 'Produk tidak ditemukan!');
         }
 
-        // Delete image file if exists
-        if ($product['image'] && file_exists(FCPATH . $product['image'])) {
-            unlink(FCPATH . $product['image']);
-        }
-
+        // IMPORTANT: Soft delete - file gambar tetap disimpan
+        // Produk bisa dipulihkan kembali dengan tombol restore
+        
         if ($this->productModel->delete($id)) {
             return redirect()->to('/admin/products')->with('message', 'Produk berhasil dihapus!');
         }
@@ -409,5 +420,32 @@ class ProductController extends BaseController
         }
 
         return redirect()->back()->with('error', 'Gagal mengupdate stok!');
+    }
+
+    /**
+     * Restore soft deleted product
+     */
+    public function restore($id)
+    {
+        $product = $this->productModel->withDeleted()->find($id);
+
+        if (!$product) {
+            return redirect()->back()->with('error', 'Produk tidak ditemukan!');
+        }
+
+        // Check if product is actually deleted
+        if (!$product['deleted_at']) {
+            return redirect()->back()->with('error', 'Produk tidak dalam status dihapus!');
+        }
+
+        // Use Query Builder directly to bypass soft delete filter
+        $db = \Config\Database::connect();
+        $builder = $db->table('products');
+        
+        if ($builder->where('id', $id)->update(['deleted_at' => null])) {
+            return redirect()->back()->with('message', 'Produk berhasil dipulihkan!');
+        }
+
+        return redirect()->back()->with('error', 'Gagal memulihkan produk!');
     }
 }

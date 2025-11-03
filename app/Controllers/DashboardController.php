@@ -139,15 +139,16 @@ class DashboardController extends BaseController
         $stockModel = new ProductStockModel();
         $outletId = $user->outlet_id;
         
-        // Get all categories
+        // Get all categories (only active/not deleted)
         $categories = $categoryModel->findAll();
         
-        // Get all products with their stock
+        // Get all products with their stock (only active/not deleted products)
         $db = \Config\Database::connect();
         $sql = "SELECT p.*, c.name as category_name, COALESCE(ps.stock, 0) as stock 
                 FROM products p
-                LEFT JOIN categories c ON c.id = p.category_id
-                LEFT JOIN product_stocks ps ON ps.product_id = p.id AND ps.outlet_id = ?";
+                LEFT JOIN categories c ON c.id = p.category_id AND c.deleted_at IS NULL
+                LEFT JOIN product_stocks ps ON ps.product_id = p.id AND ps.outlet_id = ?
+                WHERE p.deleted_at IS NULL";
         $query = $db->query($sql, [$outletId]);
         $products = $query->getResultArray();
         
@@ -321,6 +322,143 @@ class DashboardController extends BaseController
         return $this->response->setJSON([
             'transaction' => $transaction,
             'items' => $items
+        ]);
+    }
+
+    /**
+     * DataTable endpoint for Admin - Recent Transactions
+     */
+    public function adminTransactionsDatatable()
+    {
+        $request = $this->request;
+        $db = \Config\Database::connect();
+        
+        // DataTable parameters
+        $draw = $request->getGet('draw');
+        $start = $request->getGet('start') ?? 0;
+        $length = $request->getGet('length') ?? 10;
+        $searchValue = $request->getGet('search')['value'] ?? '';
+        $orderColumn = $request->getGet('order')[0]['column'] ?? 4; // default: created_at
+        $orderDir = $request->getGet('order')[0]['dir'] ?? 'desc';
+        
+        // Column mapping
+        $columns = [
+            0 => 't.transaction_code',
+            1 => 'o.name',
+            2 => 'u.username',
+            3 => 't.grand_total',
+            4 => 't.created_at'
+        ];
+        
+        // Base query
+        $builder = $db->table('transactions t')
+            ->select('t.id, t.transaction_code, t.grand_total, t.created_at, o.name as outlet_name, u.username as cashier_name')
+            ->join('outlets o', 'o.id = t.outlet_id', 'left')
+            ->join('users u', 'u.id = t.user_id', 'left')
+            ->where('t.payment_status', 'paid');
+        
+        // Search filter
+        if (!empty($searchValue)) {
+            $builder->groupStart()
+                ->like('t.transaction_code', $searchValue)
+                ->orLike('o.name', $searchValue)
+                ->orLike('u.username', $searchValue)
+                ->groupEnd();
+        }
+        
+        // Total records (filtered)
+        $recordsFiltered = $builder->countAllResults(false);
+        
+        // Total records (all)
+        $recordsTotal = $db->table('transactions')
+            ->where('payment_status', 'paid')
+            ->countAllResults();
+        
+        // Apply ordering
+        $orderColumnName = $columns[$orderColumn] ?? 't.created_at';
+        $builder->orderBy($orderColumnName, $orderDir);
+        
+        // Apply pagination
+        $builder->limit($length, $start);
+        
+        // Get data
+        $data = $builder->get()->getResultArray();
+        
+        return $this->response->setJSON([
+            'draw' => intval($draw),
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data
+        ]);
+    }
+
+    /**
+     * DataTable endpoint for Manager - Recent Transactions
+     */
+    public function managerTransactionsDatatable()
+    {
+        $request = $this->request;
+        $user = auth()->user();
+        $outletId = $user->outlet_id;
+        $db = \Config\Database::connect();
+        
+        // DataTable parameters
+        $draw = $request->getGet('draw');
+        $start = $request->getGet('start') ?? 0;
+        $length = $request->getGet('length') ?? 10;
+        $searchValue = $request->getGet('search')['value'] ?? '';
+        $orderColumn = $request->getGet('order')[0]['column'] ?? 4; // default: created_at
+        $orderDir = $request->getGet('order')[0]['dir'] ?? 'desc';
+        
+        // Column mapping
+        $columns = [
+            0 => 't.transaction_code',
+            1 => 'u.username',
+            2 => 't.customer_name',
+            3 => 't.grand_total',
+            4 => 't.created_at'
+        ];
+        
+        // Base query - only outlet transactions
+        $builder = $db->table('transactions t')
+            ->select('t.id, t.transaction_code, t.grand_total, t.created_at, t.customer_name, u.username as cashier_name')
+            ->join('users u', 'u.id = t.user_id', 'left')
+            ->where('t.outlet_id', $outletId)
+            ->where('t.payment_status', 'paid');
+        
+        // Search filter
+        if (!empty($searchValue)) {
+            $builder->groupStart()
+                ->like('t.transaction_code', $searchValue)
+                ->orLike('u.username', $searchValue)
+                ->orLike('t.customer_name', $searchValue)
+                ->groupEnd();
+        }
+        
+        // Total records (filtered)
+        $recordsFiltered = $builder->countAllResults(false);
+        
+        // Total records (all)
+        $recordsTotal = $db->table('transactions')
+            ->where('outlet_id', $outletId)
+            ->where('payment_status', 'paid')
+            ->countAllResults();
+        
+        // Apply ordering
+        $orderColumnName = $columns[$orderColumn] ?? 't.created_at';
+        $builder->orderBy($orderColumnName, $orderDir);
+        
+        // Apply pagination
+        $builder->limit($length, $start);
+        
+        // Get data
+        $data = $builder->get()->getResultArray();
+        
+        return $this->response->setJSON([
+            'draw' => intval($draw),
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data
         ]);
     }
 }

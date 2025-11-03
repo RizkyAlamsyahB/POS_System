@@ -101,7 +101,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-hover mb-0">
+                            <table id="transactionsTable" class="table table-hover mb-0">
                                 <thead>
                                     <tr>
                                         <th>Kode Transaksi</th>
@@ -112,24 +112,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if (empty($recentTransactions)): ?>
-                                        <tr>
-                                            <td colspan="5" class="text-center text-muted py-4">
-                                                <i class="bi bi-inbox" style="font-size: 2.5rem;"></i>
-                                                <p class="mt-2 mb-0">Belum ada transaksi</p>
-                                            </td>
-                                        </tr>
-                                    <?php else: ?>
-                                        <?php foreach ($recentTransactions as $trx): ?>
-                                            <tr class="clickable-row" style="cursor: pointer;" onclick="viewTransactionDetail(<?= $trx['id'] ?>)">
-                                                <td><code><?= esc($trx['transaction_code']) ?></code></td>
-                                                <td><?= esc($trx['cashier_name']) ?></td>
-                                                <td><?= esc($trx['customer_name']) ?: '-' ?></td>
-                                                <td class="text-end"><strong>Rp <?= number_format($trx['grand_total'], 0, ',', '.') ?></strong></td>
-                                                <td><small><?= date('d/m/Y H:i', strtotime($trx['created_at'])) ?></small></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
+                                    <!-- Data loaded via AJAX -->
                                 </tbody>
                             </table>
                         </div>
@@ -209,7 +192,7 @@
 
 <!-- Modal Detail Transaksi -->
 <div class="modal fade" id="modalTransactionDetail" tabindex="-1" aria-labelledby="modalTransactionDetailLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl modal-fullscreen-md-down">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalTransactionDetailLabel">Detail Transaksi</h5>
@@ -228,10 +211,17 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
-<!-- Pusher JS Library - LOAD FIRST -->
+<!-- DataTables CSS & JS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<!-- Pusher JS Library -->
 <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
 
 <script>
+    let transactionsTable;
+
     function formatRupiah(number) {
         return new Intl.NumberFormat('id-ID').format(number);
     }
@@ -286,9 +276,9 @@
                 
                 const html = `
                     <div class="mb-4">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <table class="table table-sm table-borderless">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <table class="table table-sm table-borderless mb-0">
                                     <tr>
                                         <td width="140"><strong>Kode Transaksi</strong></td>
                                         <td><code class="fs-6">${trx.transaction_code}</code></td>
@@ -303,8 +293,8 @@
                                     </tr>
                                 </table>
                             </div>
-                            <div class="col-md-6">
-                                <table class="table table-sm table-borderless">
+                            <div class="col-12 col-md-6">
+                                <table class="table table-sm table-borderless mb-0">
                                     <tr>
                                         <td width="140"><strong>Tanggal</strong></td>
                                         <td>${new Date(trx.created_at).toLocaleString('id-ID')}</td>
@@ -324,15 +314,15 @@
                     
                     <h6 class="mb-3">Detail Item & Analisis Profit</h6>
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered">
+                        <table class="table table-sm table-bordered mb-0" style="min-width: 600px;">
                             <thead class="table-light">
                                 <tr>
                                     <th>Produk</th>
-                                    <th class="text-center">Qty</th>
-                                    <th class="text-end">Harga Jual</th>
-                                    <th class="text-end">HPP</th>
-                                    <th class="text-end">Diskon</th>
-                                    <th class="text-end">Profit (Margin)</th>
+                                    <th class="text-center" style="min-width: 60px;">Qty</th>
+                                    <th class="text-end" style="min-width: 100px;">Harga Jual</th>
+                                    <th class="text-end" style="min-width: 100px;">HPP</th>
+                                    <th class="text-end" style="min-width: 80px;">Diskon</th>
+                                    <th class="text-end" style="min-width: 120px;">Profit (Margin)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -353,9 +343,9 @@
                         </table>
                     </div>
                     
-                    <h6 class="mb-3">Ringkasan Pembayaran</h6>
+                    <h6 class="mb-3 mt-4">Ringkasan Pembayaran</h6>
                     <div class="row">
-                        <div class="col-md-6 offset-md-6">
+                        <div class="col-12 col-md-8 offset-md-4 col-lg-6 offset-lg-6">
                             <table class="table table-sm">
                                 <tr>
                                     <td>Total Sebelum Diskon</td>
@@ -403,6 +393,62 @@
 
     // Clean up modal when hidden
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize DataTable
+        transactionsTable = $('#transactionsTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '/manager/dashboard/transactions-datatable',
+                type: 'GET'
+            },
+            columns: [
+                {
+                    data: 'transaction_code',
+                    render: function(data) {
+                        return `<code>${data}</code>`;
+                    }
+                },
+                { data: 'cashier_name' },
+                {
+                    data: 'customer_name',
+                    render: function(data) {
+                        return data || '-';
+                    }
+                },
+                {
+                    data: 'grand_total',
+                    className: 'text-end',
+                    render: function(data) {
+                        return `<strong>Rp ${formatRupiah(data)}</strong>`;
+                    }
+                },
+                {
+                    data: 'created_at',
+                    render: function(data) {
+                        const date = new Date(data);
+                        return `<small>${date.toLocaleDateString('id-ID', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}</small>`;
+                    }
+                }
+            ],
+            order: [[4, 'desc']], // Sort by created_at DESC
+            pageLength: 10,
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
+            },
+            createdRow: function(row, data) {
+                $(row).css('cursor', 'pointer');
+                $(row).on('click', function() {
+                    viewTransactionDetail(data.id);
+                });
+            }
+        });
+
         const modalElement = document.getElementById('modalTransactionDetail');
         if (modalElement) {
             modalElement.addEventListener('hidden.bs.modal', function () {
@@ -429,89 +475,14 @@
 
         // Listen for new transaction event
         channel.bind('transaction-created', function(data) {
-            // Update dashboard stats
-            updateDashboardStats(data);
-            
-            // Add transaction to recent transactions table
-            addTransactionToTable(data);
+            // Reload DataTable to show new transaction
+            if (transactionsTable) {
+                transactionsTable.ajax.reload(null, false); // false = stay on current page
+            }
             
             // Show notification
             showTransactionNotification(data);
         });
-
-        /**
-         * Update dashboard statistics
-         */
-        function updateDashboardStats(data) {
-            // Update total penjualan hari ini
-            const totalSalesEl = document.querySelector('.stats-icon.purple');
-            if (totalSalesEl) {
-                const amountEl = totalSalesEl.closest('.col-6').querySelector('h3');
-                if (amountEl) {
-                    const currentAmount = parseFloat(amountEl.textContent.replace(/[^0-9]/g, '')) || 0;
-                    const newAmount = currentAmount + data.total;
-                    amountEl.textContent = 'Rp ' + formatNumber(newAmount);
-                }
-            }
-
-            // Update jumlah transaksi
-            const countEl = document.querySelector('.col-6:nth-child(2) h3');
-            if (countEl) {
-                const currentCount = parseInt(countEl.textContent) || 0;
-                countEl.textContent = currentCount + 1;
-            }
-        }
-
-        /**
-         * Add new transaction to the table
-         */
-        function addTransactionToTable(data) {
-            const tbody = document.querySelector('.table-hover tbody');
-            if (!tbody) return;
-
-            // Remove "Belum ada transaksi" message if exists
-            const emptyRow = tbody.querySelector('td[colspan="5"]');
-            if (emptyRow) {
-                emptyRow.closest('tr').remove();
-            }
-
-            // Format date
-            const date = new Date(data.timestamp);
-            const formattedDate = date.toLocaleDateString('id-ID', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            }).replace(',', '');
-
-            // Create new row
-            const newRow = document.createElement('tr');
-            newRow.className = 'clickable-row new-transaction-highlight';
-            newRow.style.cursor = 'pointer';
-            newRow.onclick = function() { viewTransactionDetail(data.transaction_id); };
-            newRow.innerHTML = `
-                <td><code>${escapeHtml(data.transaction_number)}</code></td>
-                <td>${escapeHtml(data.cashier_name)}</td>
-                <td>${escapeHtml(data.customer_name) || '-'}</td>
-                <td class="text-end"><strong>Rp ${formatNumber(data.total)}</strong></td>
-                <td><small>${formattedDate}</small></td>
-            `;
-
-            // Prepend to table (newest first)
-            tbody.insertBefore(newRow, tbody.firstChild);
-
-            // Add highlight animation
-            setTimeout(() => {
-                newRow.classList.remove('new-transaction-highlight');
-            }, 3000);
-
-            // Limit table to 10 rows
-            const rows = tbody.querySelectorAll('tr');
-            if (rows.length > 10) {
-                rows[rows.length - 1].remove();
-            }
-        }
 
         /**
          * Show toast notification for new transaction
@@ -522,7 +493,7 @@
                     <div class="d-flex">
                         <div class="toast-body">
                             <strong>🎉 Transaksi Baru!</strong><br>
-                            ${data.transaction_number}<br>
+                            ${escapeHtml(data.transaction_number)}<br>
                             Total: <strong>Rp ${formatNumber(data.total)}</strong><br>
                             <small>Kasir: ${escapeHtml(data.cashier_name)}</small>
                         </div>
@@ -565,21 +536,5 @@
         }
     })();
 </script>
-
-<!-- CSS for new transaction highlight animation -->
-<style>
-    @keyframes highlightTransaction {
-        0% {
-            background-color: #d4edda;
-        }
-        100% {
-            background-color: transparent;
-        }
-    }
-
-    .new-transaction-highlight {
-        animation: highlightTransaction 3s ease-in-out;
-    }
-</style>
 
 <?= $this->endSection() ?>

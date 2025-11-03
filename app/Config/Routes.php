@@ -19,6 +19,7 @@ $routes->get('logout', 'AuthController::logout');
 // Admin routes (requires admin role)
 $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
     $routes->get('dashboard', 'DashboardController::adminDashboard');
+    $routes->get('dashboard/transactions-datatable', 'DashboardController::adminTransactionsDatatable');
     
     // Outlet Management
     $routes->get('outlets', 'Admin\OutletController::index');
@@ -29,6 +30,7 @@ $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
     $routes->get('outlets/edit/(:num)', 'Admin\OutletController::edit/$1');
     $routes->post('outlets/update/(:num)', 'Admin\OutletController::update/$1');
     $routes->post('outlets/delete/(:num)', 'Admin\OutletController::delete/$1');
+    $routes->post('outlets/restore/(:num)', 'Admin\OutletController::restore/$1');
     
     // User Management
     $routes->get('users', 'Admin\UserController::index');
@@ -38,6 +40,7 @@ $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
     $routes->get('users/edit/(:num)', 'Admin\UserController::edit/$1');
     $routes->post('users/update/(:num)', 'Admin\UserController::update/$1');
     $routes->post('users/delete/(:num)', 'Admin\UserController::delete/$1');
+    $routes->post('users/restore/(:num)', 'Admin\UserController::restore/$1');
     $routes->post('users/toggle-status/(:num)', 'Admin\UserController::toggleStatus/$1');
     
     // Category Management
@@ -48,6 +51,7 @@ $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
     $routes->get('categories/edit/(:num)', 'Admin\CategoryController::edit/$1');
     $routes->post('categories/update/(:num)', 'Admin\CategoryController::update/$1');
     $routes->post('categories/delete/(:num)', 'Admin\CategoryController::delete/$1');
+    $routes->post('categories/restore/(:num)', 'Admin\CategoryController::restore/$1');
     
     // Product Management
     $routes->get('products', 'Admin\ProductController::index');
@@ -56,6 +60,7 @@ $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
     $routes->get('products/edit/(:num)', 'Admin\ProductController::edit/$1');
     $routes->post('products/update/(:num)', 'Admin\ProductController::update/$1');
     $routes->post('products/delete/(:num)', 'Admin\ProductController::delete/$1');
+    $routes->post('products/restore/(:num)', 'Admin\ProductController::restore/$1');
     $routes->get('products/stock/(:num)', 'Admin\ProductController::stock/$1');
     $routes->post('products/stock/update/(:num)', 'Admin\ProductController::updateStock/$1');
     $routes->get('products/datatable', 'Admin\ProductController::datatable');
@@ -84,6 +89,7 @@ $routes->group('admin', ['filter' => 'group:admin'], function($routes) {
 // Temporarily disable outletactive filter for testing
 $routes->group('manager', ['filter' => 'group:manager'], function($routes) {
     $routes->get('dashboard', 'DashboardController::managerDashboard');
+    $routes->get('dashboard/transactions-datatable', 'DashboardController::managerTransactionsDatatable');
     
     // Outlet Management (View Own Outlet Only)
     $routes->get('outlets', 'Manager\OutletController::index');

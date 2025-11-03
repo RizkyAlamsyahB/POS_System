@@ -669,19 +669,18 @@ body {
     right: 2rem;
     width: 64px;
     height: 64px;
-    background: linear-gradient(135deg, #3772F0 0%, #2563eb 100%);
-    color: white;
+    background: transparent;
+    color: #3772F0;
     border: none;
-    border-radius: 50%;
-    font-size: 1.5rem;
+    font-size: 2.5rem;
     cursor: pointer;
-    box-shadow: 0 8px 24px rgba(55, 114, 240, 0.4);
     z-index: 1000;
     transition: all 0.3s;
 }
 
 .mobile-cart-btn:hover {
     transform: scale(1.1);
+    color: #2563eb;
 }
 
 .mobile-cart-badge {

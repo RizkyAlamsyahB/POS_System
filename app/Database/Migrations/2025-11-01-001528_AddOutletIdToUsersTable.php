@@ -8,6 +8,8 @@ class AddOutletIdToUsersTable extends Migration
 {
     public function up()
     {
+        $db = \Config\Database::connect();
+        
         $fields = [
             'outlet_id' => [
                 'type'       => 'INT',
@@ -17,6 +19,14 @@ class AddOutletIdToUsersTable extends Migration
                 'after'      => 'id',
             ],
         ];
+
+        // Add deleted_at only if it doesn't exist
+        if (!$db->fieldExists('deleted_at', 'users')) {
+            $fields['deleted_at'] = [
+                'type'       => 'DATETIME',
+                'null'       => true,
+            ];
+        }
 
         $this->forge->addColumn('users', $fields);
 
@@ -44,6 +54,10 @@ class AddOutletIdToUsersTable extends Migration
         // Drop column if exists
         if ($db->fieldExists('outlet_id', 'users')) {
             $this->forge->dropColumn('users', 'outlet_id');
+        }
+        
+        if ($db->fieldExists('deleted_at', 'users')) {
+            $this->forge->dropColumn('users', 'deleted_at');
         }
     }
 }

@@ -78,11 +78,11 @@
                 </div>
                 <h5>Apakah Anda yakin?</h5>
                 <p class="text-muted mb-3">
-                    Produk <strong id="deleteProductName" class="text-dark"></strong> akan dihapus secara permanen.
+                    Produk <strong id="deleteProductName" class="text-dark"></strong> akan dihapus.
                 </p>
-                <div class="alert alert-warning text-start small">
+                <div class="alert alert-info text-start small">
                     <i class="bi bi-info-circle"></i> 
-                    <strong>Perhatian:</strong> Data yang sudah dihapus tidak dapat dikembalikan.
+                    <strong>Catatan:</strong> Produk yang dihapus masih bisa dipulihkan kembali menggunakan tombol "Pulihkan".
                 </div>
             </div>
             <div class="modal-footer">
@@ -105,8 +105,9 @@
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
-// Store delete product ID temporarily
+// Store delete/restore product ID temporarily
 let deleteProductId = null;
+let restoreProductId = null;
 
 function confirmDelete(id) {
     const row = event.target.closest('tr');
@@ -121,6 +122,25 @@ function confirmDelete(id) {
     // Show modal
     const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     modal.show();
+}
+
+function confirmRestore(id) {
+    if (confirm('Apakah Anda yakin ingin memulihkan produk ini? Produk akan kembali aktif dan bisa dijual kembali.')) {
+        // Create form and submit
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/products/restore/' + id;
+        
+        // Add CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '<?= csrf_token() ?>';
+        csrfInput.value = '<?= csrf_hash() ?>';
+        form.appendChild(csrfInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
 }
 
 // Handle confirm delete button
