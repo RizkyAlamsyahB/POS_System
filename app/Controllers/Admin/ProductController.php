@@ -211,9 +211,12 @@ class ProductController extends BaseController
         $imageFile = $this->request->getFile('image');
         
         if ($imageFile && $imageFile->isValid() && !$imageFile->hasMoved()) {
+            // Auto-create uploads/products directory if not exists
+            $uploadPath = $this->getUploadPath('products');
+            
             $newName = $imageFile->getRandomName();
             // Simpan di public/uploads/products agar bisa diakses via web
-            $imageFile->move(FCPATH . 'uploads/products', $newName);
+            $imageFile->move($uploadPath, $newName);
             $imagePath = 'uploads/products/' . $newName;
         }
 
@@ -309,13 +312,16 @@ class ProductController extends BaseController
         $imageFile = $this->request->getFile('image');
         
         if ($imageFile && $imageFile->isValid() && !$imageFile->hasMoved()) {
+            // Auto-create uploads/products directory if not exists
+            $uploadPath = $this->getUploadPath('products');
+            
             // Delete old image if exists
             if ($product['image'] && file_exists(FCPATH . $product['image'])) {
                 unlink(FCPATH . $product['image']);
             }
             
             $newName = $imageFile->getRandomName();
-            $imageFile->move(FCPATH . 'uploads/products', $newName);
+            $imageFile->move($uploadPath, $newName);
             $imagePath = 'uploads/products/' . $newName;
         } elseif ($this->request->getPost('delete_image')) {
             // Handle delete image checkbox

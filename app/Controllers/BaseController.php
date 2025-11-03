@@ -55,4 +55,32 @@ abstract class BaseController extends Controller
 
         // E.g.: $this->session = service('session');
     }
+
+    /**
+     * Auto-create directory if not exists
+     * 
+     * @param string $path Directory path to create
+     * @param int $permissions Directory permissions (default: 0755)
+     * @return bool True if directory exists or was created successfully
+     */
+    protected function ensureDirectoryExists(string $path, int $permissions = 0755): bool
+    {
+        if (!is_dir($path)) {
+            return mkdir($path, $permissions, true);
+        }
+        return true;
+    }
+
+    /**
+     * Get upload path for specific type and auto-create if needed
+     * 
+     * @param string $type Upload type (e.g., 'products', 'users', 'categories')
+     * @return string Full path to upload directory
+     */
+    protected function getUploadPath(string $type): string
+    {
+        $uploadPath = FCPATH . 'uploads/' . $type;
+        $this->ensureDirectoryExists($uploadPath);
+        return $uploadPath;
+    }
 }

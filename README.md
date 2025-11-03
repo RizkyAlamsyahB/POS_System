@@ -137,21 +137,14 @@ chmod -R 777 writable/
 >
 > Setiap folder sudah dilindungi dengan `index.html` untuk mencegah directory listing.
 
-#### 6. Buat Folder Upload Produk
-```bash
-# Buat folder untuk upload gambar produk
-mkdir -p public/uploads/products
+> **🚀 Auto-Create Upload Directories**: Sistem otomatis membuat folder upload yang diperlukan (seperti `public/uploads/products/`) saat pertama kali ada upload file. Tidak perlu dibuat manual!
 
-# Set permission
-chmod -R 755 public/uploads/
-```
-
-#### 7. Jalankan Migration
+#### 6. Jalankan Migration
 ```bash
 php spark migrate --all
 ```
 
-#### 8. Seed Data Awal
+#### 7. Seed Data Awal
 ```bash
 # Seed outlet dan users (WAJIB)
 php spark db:seed InitialDataSeeder
@@ -163,7 +156,7 @@ php spark db:seed ProductDataSeeder
 php spark db:seed PromotionSeeder
 ```
 
-#### 9. Jalankan Server
+#### 8. Jalankan Server
 ```bash
 php spark serve
 ```
@@ -251,11 +244,12 @@ Setelah seeding, Anda dapat login dengan:
    - Upload gambar produk (optional, max 2MB, format: JPG/PNG)
 4. Klik **Save**
 
-> **Tips Upload Gambar:**
+> **💡 Tips Upload Gambar:**
 > - Format yang didukung: JPG, JPEG, PNG
 > - Ukuran maksimal: 2MB
-> - Gambar akan disimpan di `public/uploads/products/`
+> - Folder `public/uploads/products/` otomatis dibuat jika belum ada
 > - Gambar otomatis di-rename untuk keamanan
+> - Tidak perlu membuat folder upload manual!
 
 #### Mengatur Stok Per Outlet
 1. Menu **Admin** → **Products**
@@ -519,22 +513,6 @@ app.baseURL = 'http://localhost:8080/'
 3. Untuk development, selalu gunakan:
 ```bash
 php spark serve
-```
-
-### ❌ Upload Gambar Gagal
-
-**Penyebab**: Folder `public/uploads/products/` tidak ada atau permission salah.
-
-**Solusi**:
-```bash
-# Buat folder jika belum ada
-mkdir -p public/uploads/products
-
-# Set permission
-chmod -R 755 public/uploads/
-
-# Jika pakai Apache
-sudo chown -R www-data:www-data public/uploads/
 ```
 
 ### ❌ Real-time Update Tidak Berfungsi
