@@ -135,19 +135,19 @@ Buka browser: `http://localhost:8080`
 ### 🔑 Default Login Credentials
 
 **Super Admin**
-* Username: `admin`
+* Email: `admin@pos.com`
 * Password: `admin123`
 
 **Manager**
-* Username: `manager1`
+* Email: `manager1@pos.com`
 * Password: `manager123`
 
 **Cashier (Jakarta Pusat)**
-* Username: `cashier1`
+* Email: `cashier1@pos.com`
 * Password: `cashier123`
 
 **Cashier (Jakarta Selatan)**
-* Username: `cashier2`
+* Email: `cashier2@pos.com`
 * Password: `cashier123`
 
 ---
